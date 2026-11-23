@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>たべものマスター（試作）</title>
+<title>たべものマスター</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
@@ -321,7 +321,7 @@ h3{font-size:16px;margin:22px 0 10px;color:var(--sub)}
     <div class="hero">
       <svg id="hero-svg" viewBox="0 0 340 170" aria-hidden="true"></svg>
       <p class="sub" id="hero-sub"></p>
-      <h1>たべものマスター<small data-r="{試作|しさく}"></small></h1>
+      <h1>たべものマスター</h1>
     </div>
     <div class="menu">
       <button class="btn primary" id="btn-play"><span class="ic" id="ic-play"></span>クイズであそぶ</button>
@@ -329,7 +329,6 @@ h3{font-size:16px;margin:22px 0 10px;color:var(--sub)}
       <button class="btn" id="btn-weak"><span class="ic" id="ic-weak"></span>にがてリスト<span class="cnt hidden" id="weak-cnt">0</span></button>
     </div>
     <p class="stat" id="stat"></p>
-    <button class="linkbtn" id="btn-sample" data-r="{絵|え}のみほん（{試作|しさく}で{見|み}てほしいところ）"></button>
   </section>
 
   <section class="screen" id="scr-course">
@@ -1047,7 +1046,7 @@ function renderTitle() {
   const w = weakItems().length, c = $('#weak-cnt'); c.textContent = w; c.classList.toggle('hidden', !w);
   const nG = FOODS.filter(f => f.g).length, nS = FOODS.filter(f => f.s).length;
   const all = [...FOODS, ...DISHES, ...EVENTS], gotN = all.filter(f => store.d.got[f.id]).length;
-  $('#stat').innerHTML = R(`{試作|しさく}：たべもの ${FOODS.length}・{料理|りょうり} ${DISHES.length}・{行事|ぎょうじ} ${EVENTS.length}　ずかん ${gotN} / ${all.length}`);
+  $('#stat').innerHTML = R(`{収録|しゅうろく}：たべもの ${FOODS.length}・{料理|りょうり} ${DISHES.length}・{行事|ぎょうじ} ${EVENTS.length}　ずかん ${gotN} / ${all.length}`);
   $('#hero-sub').innerHTML = R('3{色|しょく}のなかまと、{旬|しゅん}の{季節|きせつ}をおぼえよう');
 }
 (function hero() {
@@ -1062,7 +1061,7 @@ function renderTitle() {
 $('#btn-play').onclick = () => { beep('tap'); show('course'); renderCourses(); };
 $('#btn-zukan').onclick = () => { beep('tap'); show('zukan'); renderZukan(); };
 $('#btn-weak').onclick = () => { beep('tap'); show('weak'); };
-$('#btn-sample').onclick = () => { beep('tap'); show('sample'); renderSample(); };
+if ($('#btn-sample')) $('#btn-sample').onclick = () => { beep('tap'); show('sample'); renderSample(); };
 
 /* courses */
 const NQ = 10, TA_SEC = 60, Q_SEC = 8;
@@ -1561,7 +1560,7 @@ function renderZukan() {
   $('#z-g').classList.toggle('hidden', zTab !== 'g'); $('#z-s').classList.toggle('hidden', zTab !== 's'); $('#z-mp').classList.toggle('hidden', !['m', 'p', 'r', 'e'].includes(zTab));
   if (zTab === 'g') renderZG(); else if (zTab === 's') renderCal(); else if (zTab === 'r') renderZR(); else if (zTab === 'e') renderZE(); else renderZMP(zTab);
   renderZInfo();
-  $('#credit').innerHTML = R('3{色|しょく}の{分|わ}け{方|かた}は、{農林水産省|のうりんすいさんしょう}「{実践|じっせん}{食育|しょくいく}ナビ」の「{三色|さんしょく}{食品群|しょくひんぐん}」の{説明|せつめい}に{合|あ}わせています。{旬|しゅん}は、{農林水産省|のうりんすいさんしょう}「{子|こ}どもの{食育|しょくいく}」の「{食|た}べ{物|もの}と{日本|にほん}の{四季|しき}」「{食|た}べ{物|もの}の{旬|しゅん}や{季節|きせつ}がわかるかな」に（ふやした{分|ぶん}は、{農林水産省|のうりんすいさんしょう}の{補助|ほじょ}{事業|じぎょう}でつくられた「{飲食|いんしょく}{事業者|じぎょうしゃ}のためのインバウンド{対応|たいおう}ガイドブック」の「{食材|しょくざい}{歳時記|さいじき}」に。{月|つき}は{品目|ひんもく}ごとに、{農畜産業振興機構|のうちくさんぎょうしんこうきこう}や{県|けん}・{市|し}、{水産庁|すいさんちょう}などの{資料|しりょう}でたしかめています）、もとは{同|おな}じく「{大豆|だいず}{編|へん}」「{乳製品|にゅうせいひん}」「お{米|こめ}{編|へん}」と{農林水産省|のうりんすいさんしょう}の{麦|むぎ}・{練|ね}り{物|もの}の{資料|しりょう}に、どこを{食|た}べてるは「{野菜|やさい}は{土|つち}からやってくる」と{文部科学省|もんぶかがくしょう}「{食生活|しょくせいかつ}{学習|がくしゅう}{教材|きょうざい}」、{農林水産省|のうりんすいさんしょう}の{野菜|やさい}の{区分|くぶん}（しょくようぎくは{山形県|やまがたけん}の{資料|しりょう}）に、{行事|ぎょうじ}は「{行事食|ぎょうじしょく}について」、{北陸|ほくりく}{農政局|のうせいきょく}の{資料|しりょう}（{農林水産省|のうりんすいさんしょう}「{和食|わしょく}」より）、{農林水産省|のうりんすいさんしょう}「aff」の「{節分|せつぶん}といわし{料理|りょうり}」、{世田谷区|せたがやく}・{川口市|かわぐちし}の{資料|しりょう}に、こんだての{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}は「{食事|しょくじ}バランスガイド」と{農林水産省|のうりんすいさんしょう}の{料理|りょうり}イラスト{集|しゅう}に{合|あ}わせています（{試作|しさく}）。');
+  $('#credit').innerHTML = R('3{色|しょく}の{分|わ}け{方|かた}は、{農林水産省|のうりんすいさんしょう}「{実践|じっせん}{食育|しょくいく}ナビ」の「{三色|さんしょく}{食品群|しょくひんぐん}」の{説明|せつめい}に{合|あ}わせています。{旬|しゅん}は、{農林水産省|のうりんすいさんしょう}「{子|こ}どもの{食育|しょくいく}」の「{食|た}べ{物|もの}と{日本|にほん}の{四季|しき}」「{食|た}べ{物|もの}の{旬|しゅん}や{季節|きせつ}がわかるかな」に（ふやした{分|ぶん}は、{農林水産省|のうりんすいさんしょう}の{補助|ほじょ}{事業|じぎょう}でつくられた「{飲食|いんしょく}{事業者|じぎょうしゃ}のためのインバウンド{対応|たいおう}ガイドブック」の「{食材|しょくざい}{歳時記|さいじき}」に。{月|つき}は{品目|ひんもく}ごとに、{農畜産業振興機構|のうちくさんぎょうしんこうきこう}や{県|けん}・{市|し}、{水産庁|すいさんちょう}などの{資料|しりょう}でたしかめています）、もとは{同|おな}じく「{大豆|だいず}{編|へん}」「{乳製品|にゅうせいひん}」「お{米|こめ}{編|へん}」と{農林水産省|のうりんすいさんしょう}の{麦|むぎ}・{練|ね}り{物|もの}の{資料|しりょう}に、どこを{食|た}べてるは「{野菜|やさい}は{土|つち}からやってくる」と{文部科学省|もんぶかがくしょう}「{食生活|しょくせいかつ}{学習|がくしゅう}{教材|きょうざい}」、{農林水産省|のうりんすいさんしょう}の{野菜|やさい}の{区分|くぶん}（しょくようぎくは{山形県|やまがたけん}の{資料|しりょう}）に、{行事|ぎょうじ}は「{行事食|ぎょうじしょく}について」、{北陸|ほくりく}{農政局|のうせいきょく}の{資料|しりょう}（{農林水産省|のうりんすいさんしょう}「{和食|わしょく}」より）、{農林水産省|のうりんすいさんしょう}「aff」の「{節分|せつぶん}といわし{料理|りょうり}」、{世田谷区|せたがやく}・{川口市|かわぐちし}の{資料|しりょう}に、こんだての{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}は「{食事|しょくじ}バランスガイド」と{農林水産省|のうりんすいさんしょう}の{料理|りょうり}イラスト{集|しゅう}に{合|あ}わせています。');
 }
 const cell = id => `<button class="fcell${zSel === id ? ' sel' : ''}${store.d.got[id] ? '' : ' nogot'}" data-id="${id}">${foodSvg(id)}<span>${R(F[id].n)}</span></button>`;
 function bindCells(root) { $$('.fcell', root).forEach(b => b.onclick = () => { beep('tap'); zSel = zSel === b.dataset.id ? null : b.dataset.id; renderZukan(); if (zSel) $('#z-info').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }); }
