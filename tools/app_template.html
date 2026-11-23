@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たべものマスター（試作）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF7E8; --ink:#24324A; --sub:#647089; --navy:#1F3A5F; --card:#fff; --line:#EADFC8;
+  --accent:#2BA84A; --accent2:#F08A24; --ok:#1F9D63; --ng:#E0484B;
+  --red:#E8504A; --yel:#F2B200; --grn:#3DAA5C;
+  --haru:#E86A9A; --natsu:#1E9BC9; --aki:#D9772B; --fuyu:#6C7FD1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'M PLUS Rounded 1c',system-ui,-apple-system,'Hiragino Maru Gothic ProN',sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh}
+button{font-family:inherit}
+ruby rt{font-weight:700;color:var(--sub);font-size:.5em}
+.hidden{display:none!important}
+
+/* header */
+.topbar{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;display:flex;align-items:center;gap:8px;padding:8px 12px}
+.topbar::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:5px;background:linear-gradient(90deg,var(--red) 0 33.3%,var(--yel) 33.3% 66.6%,var(--grn) 66.6%)}
+.logo{display:flex;align-items:center;gap:8px;background:none;border:0;color:#fff;font-weight:800;font-size:17px;cursor:pointer;padding:2px 4px}
+.logo .mk{width:28px;height:28px;border-radius:50%;background:conic-gradient(var(--red) 0 120deg,var(--yel) 120deg 240deg,var(--grn) 240deg);position:relative}
+.logo .mk::after{content:'';position:absolute;inset:6px;border-radius:50%;background:#fff}
+.spacer{flex:1}
+.tbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:6px 14px;min-height:44px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.tbtn{display:inline-flex;align-items:center;gap:4px;position:relative;flex:none}
+.tbtn .ti{width:18px;height:18px;flex:none}
+.tbtn .st{display:none;position:absolute;right:-4px;top:-5px;background:var(--ng);color:#fff;border-radius:6px;padding:0 5px;font-size:10.5px;font-weight:800;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tbtn[aria-pressed="false"]{background:transparent;border-style:dashed;color:#AEB9C9}
+.tbtn[aria-pressed="false"] .st{display:inline-block}
+.tbtn .ti .on{display:inline}.tbtn .ti .off{display:none}
+.tbtn[aria-pressed="false"] .ti .on{display:none}.tbtn[aria-pressed="false"] .ti .off{display:inline}
+.logo{white-space:nowrap;min-width:0}.logo .mk{flex:none}
+@media (max-width:380px){.logo{font-size:14.5px;gap:6px}.tbtn{padding:6px 9px}.tbtn .ti{display:none}.topbar{gap:6px;padding:8px 8px}}
+main{max-width:820px;margin:0 auto;padding:22px 14px 48px}
+.screen{display:none}
+.screen.on{display:block;animation:fadein .25s ease-out}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:22px;margin:4px 0 14px}
+h3{font-size:16px;margin:22px 0 10px;color:var(--sub)}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;border-radius:16px;padding:15px 18px;font-weight:800;font-size:18px;cursor:pointer;color:var(--ink);background:#fff;box-shadow:0 4px 0 var(--line),0 8px 16px rgba(36,50,74,.06);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.btn.primary{background:var(--accent);color:#fff;box-shadow:0 4px 0 #1d7f36,0 8px 16px rgba(43,168,74,.18)}
+.btn.orange{background:var(--accent2);color:#fff;box-shadow:0 4px 0 #b9600f,0 8px 16px rgba(240,138,36,.18)}
+.btn.navy{background:var(--navy);color:#fff;box-shadow:0 4px 0 #0f2238}
+.btn.ghost{background:transparent;box-shadow:none;border:2px solid var(--line);font-size:15px;padding:11px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn .ic{width:30px;height:30px;flex:none}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.linkbtn{background:none;border:0;color:var(--sub);font-weight:700;font-size:13px;text-decoration:underline;cursor:pointer;display:block;margin:14px auto 0}
+
+/* title */
+.hero{background:#fff;border-radius:24px;padding:18px 18px 22px;box-shadow:0 10px 30px rgba(36,50,74,.08);text-align:center;position:relative;overflow:hidden}
+.hero svg{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.hero .sub{margin:6px 0 0;color:var(--sub);font-weight:700;font-size:14px}
+.hero h1{margin:4px 0 0;font-size:clamp(30px,8vw,44px);font-weight:800;letter-spacing:.02em;line-height:1.15}
+.hero h1 small{display:inline-block;margin-left:8px;font-size:.42em;background:var(--accent2);color:#fff;border-radius:8px;padding:3px 8px;vertical-align:middle}
+.hero .bob{animation:bob 2.4s ease-in-out infinite}
+.hero .bob.d1{animation-delay:.4s}.hero .bob.d2{animation-delay:.8s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.menu{display:grid;gap:12px;margin-top:18px}
+.stat{text-align:center;color:var(--sub);font-size:13px;margin-top:16px}
+.cnt{background:var(--ng);color:#fff;border-radius:999px;font-size:13px;padding:1px 8px;margin-left:4px}
+
+/* course */
+.seg{display:flex;background:#fff;border-radius:14px;padding:4px;gap:4px;box-shadow:0 2px 0 var(--line)}
+.seg button{flex:1;border:0;background:none;border-radius:10px;padding:10px 4px;font-weight:800;font-size:15px;color:var(--sub);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.seg-note{font-size:12.5px;color:var(--sub);margin:8px 2px 0;min-height:1.4em;line-height:1.6}
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.course{position:relative;text-align:left;border:0;border-radius:18px;background:#fff;padding:16px 16px 14px 22px;cursor:pointer;box-shadow:0 4px 0 var(--line),0 8px 16px rgba(36,50,74,.05);overflow:hidden;transition:transform .08s;color:var(--ink);font-family:inherit}
+.course:active{transform:translateY(3px)}
+.course::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--stripe)}
+.course .t{font-size:19px;font-weight:800;display:block}
+.course .d{font-size:12.5px;color:var(--sub);display:block;margin-top:4px;line-height:1.6}
+.course .best{position:absolute;right:12px;top:12px;font-size:12px;font-weight:800;color:var(--accent2)}
+
+/* quiz */
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.qno{font-weight:800;font-size:15px;white-space:nowrap}
+.pbar{flex:1;height:10px;background:#fff;border-radius:99px;overflow:hidden;box-shadow:inset 0 0 0 2px var(--line)}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#80C241);border-radius:99px;transition:width .3s}
+.pbar.time i{background:linear-gradient(90deg,var(--accent2),#F5B301);transition:none}
+.qscore{font-weight:800;color:var(--ok);white-space:nowrap}
+.qcard{background:#fff;border-radius:20px;padding:14px 16px 16px;box-shadow:0 8px 20px rgba(36,50,74,.07);text-align:center;position:relative}
+.qtag{position:absolute;left:14px;top:12px;font-size:12px;font-weight:800;color:#fff;background:var(--navy);border-radius:8px;padding:3px 9px}
+.qtimer{height:6px;border-radius:9px;background:var(--line);overflow:hidden;margin:2px 0 6px}
+.qtimer i{display:block;height:100%;background:var(--accent2);width:100%}
+.qfood{width:min(46vw,190px);height:min(46vw,190px);margin:14px auto 0;display:block}
+.qfood.pop{animation:pop .3s ease-out}
+@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:none;opacity:1}}
+.qname{font-size:clamp(24px,7vw,32px);font-weight:800;margin-top:4px;line-height:1.5}
+.qtext{font-size:clamp(16px,4.4vw,19px);font-weight:800;color:var(--sub);margin-top:2px;line-height:1.8}
+.plates{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.plate{border:0;background:none;cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-family:inherit;transition:transform .08s}
+.plate:active{transform:translateY(3px)}
+.plate .dish{width:min(26vw,118px);height:min(26vw,118px);border-radius:50%;background:radial-gradient(circle,#fff 0 52%,#F4F1EA 53% 58%,#fff 59%);border:9px solid var(--c);box-shadow:0 5px 0 rgba(36,50,74,.16),0 10px 18px rgba(36,50,74,.08);display:grid;place-items:center;font-weight:800;font-size:clamp(22px,6vw,30px);color:var(--c);position:relative}
+.plate .lab{font-size:clamp(11.5px,3.2vw,13.5px);font-weight:800;line-height:1.5;text-align:center}
+.plate .lab rt{font-size:.6em}
+.plate.ok .dish{background:var(--c);color:#fff;transform:scale(1.06)}
+.plate.ok .dish rt{color:#fff}
+.plate.ok .dish::after{content:'⭕';position:absolute;right:-8px;top:-10px;font-size:22px}
+.plate.ng .dish{opacity:1;filter:grayscale(.5)}
+.plate.ng .dish::after{content:'✖';position:absolute;right:-6px;top:-10px;font-size:22px;color:var(--ng)}
+.plate.dim{opacity:.4}
+.ktray{padding-top:40px}
+.fcell.nogot svg,.evrow.nogot svg{filter:grayscale(1) brightness(1.15);opacity:.35}
+.fcell.nogot span{color:#A9A29A}
+.zprog{background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 2px 0 var(--line);margin-bottom:12px}
+.zp-t{font-weight:800;font-size:15px;margin-bottom:6px}
+.zp-t b{font-size:20px;color:var(--accent2)}
+.zp-t rt,.zp-n rt{font-size:.55em}
+.zp-n{font-size:12px;color:var(--sub);margin-top:6px;font-weight:700}
+.newgot{margin-top:8px;font-weight:800;color:var(--accent2);font-size:15px}
+.newgot rt{font-size:.55em}
+#z-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
+.evcard{margin:30px auto 6px;display:flex;flex-direction:column;align-items:center;gap:4px;background:#FFF1EC;border:3px solid #E8B4A6;border-radius:20px;padding:18px 16px;max-width:300px}
+.evcard .evd{font-weight:800;color:#B8432E;font-size:16px}
+.evcard .evn{font-weight:800;font-size:clamp(24px,7vw,32px);line-height:1.5}
+.evcard rt{font-size:.5em}
+.sscard svg{width:56px;height:56px}
+.sscard .evd{color:var(--c)}
+.seasons.evopts{grid-template-columns:1fr}
+.seasons.evopts .sbtn{min-height:62px;font-size:clamp(17px,4.6vw,20px)}
+.evb{display:flex;flex-direction:column;align-items:center;line-height:1.4}
+.evb small{font-size:12px;opacity:.85}
+.evb>span{display:block;text-align:center}
+.qtext,.kodai{text-wrap:balance}
+.evline{display:grid;gap:8px}
+.evrow{display:flex;align-items:center;gap:10px;border:0;background:#fff;border-radius:16px;padding:6px 12px;box-shadow:0 2px 0 var(--line);cursor:pointer;font-family:inherit;color:var(--ink);text-align:left;min-height:60px}
+.evrow.sel{background:#FFE9CF}
+.evrow svg{width:50px;height:50px;flex:none}
+.evm{font-weight:800;font-size:22px;color:#B8432E;width:52px;text-align:center}
+.evm small{font-size:12px}
+.evt{display:flex;flex-direction:column;line-height:1.5}
+.evt b rt,.evt span rt{font-size:.55em}
+.cal .evk{cursor:pointer}
+.kodai{font-weight:800;font-size:clamp(16px,4.4vw,19px);line-height:1.8}
+.kodai rt,.kslot rt,.km rt,.kcard rt,.ktray rt{font-size:.55em}
+.kslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.kslot{background:var(--bg);border:2px dashed var(--line);border-radius:16px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;min-height:118px}
+.kslot.on{border-style:solid;background:#fff}
+.kslot svg{width:64px;height:64px}
+.kslot .qm{font-size:34px;font-weight:800;color:#CFC4AE;height:64px;display:grid;place-items:center}
+.kslot .kc{font-size:12px;color:var(--sub);font-weight:800}
+.kslot .kn{font-size:12.5px;font-weight:800;line-height:1.35}
+.kmeter{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:12px}
+.km{width:54px;height:54px;border-radius:50%;border:5px solid var(--c);display:grid;place-items:center;font-weight:800;font-size:20px;color:var(--c);opacity:.35;background:#fff}
+.km.on{opacity:1;background:var(--c);color:#fff}
+.km.on rt{color:#fff}
+.kh{width:100%;font-size:12px;color:var(--sub);font-weight:700}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.kcard{border:2px solid transparent;background:#fff;border-radius:16px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;color:var(--ink);box-shadow:0 2px 0 var(--line);min-height:44px}
+.kcard svg{width:58px;height:58px}
+.kcard span{font-size:12.5px;font-weight:800;line-height:1.35;text-align:center}
+.kcard.sel{border-color:var(--accent2);background:#FFF1DE}
+.kcard.ok{border-color:var(--ok);background:#E6F6EE}
+.kcard.ok:disabled,.kcard.ng:disabled{opacity:1}
+.kodai br{display:block}
+.kcard.ng{border-color:var(--ng);background:#FDE8E8}
+.kcard small{font-size:11px;color:var(--sub);font-weight:800}
+.kcard small rt{font-size:.55em}
+.ksty{display:block;width:fit-content;margin:0 auto 2px;font-size:12px;font-weight:800;color:#fff;background:var(--accent2);border-radius:999px;padding:0 10px;margin-bottom:4px;line-height:1.9}
+.ksty rt{font-size:.55em;color:#fff}
+.kstep{font-size:13px;color:var(--accent2);font-weight:800;margin-top:2px}
+.kstep rt{font-size:.55em}
+.kslot.tap{cursor:pointer}
+.kslot.rm{opacity:.45;border-color:var(--ng);border-style:solid;position:relative}
+.kslot.rm::after{content:'×';position:absolute;top:2px;right:8px;color:var(--ng);font-weight:800;font-size:22px}
+.kslot.ans{border-color:var(--ok);border-style:solid;background:#E6F6EE}
+.kwhy{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:14px}
+.kwhy rt{font-size:.55em}
+.kslots{grid-template-columns:repeat(4,1fr)!important;gap:6px!important}
+.kslot svg{width:54px!important;height:54px!important}
+.kslot.ans{border-color:var(--ok);background:#E6F6EE}
+.klegend{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;background:#fff;border-radius:14px;padding:8px 12px;margin-top:12px;box-shadow:0 2px 0 var(--line);font-size:12.5px;color:var(--sub);font-weight:700}
+.klegend b{color:var(--ink);margin-right:6px}
+.klegend rt{font-size:.55em}
+.kcard:disabled{cursor:default;opacity:.45}
+.kcard.sel:disabled{opacity:1}
+.plate.tog .dish{opacity:.55;filter:grayscale(.3)}
+.plate.tog.on .dish{opacity:1;filter:none;background:var(--c);color:#fff;transform:scale(1.04)}
+.plate.tog.on .dish rt{color:#fff}
+.plate.miss .dish{border-style:dashed;opacity:1}
+.plate.miss .dish::after{content:'！';position:absolute;right:-4px;top:-10px;font-size:22px;color:var(--accent2);font-weight:800}
+.qing{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:6px}
+.qing .ingh{width:100%;font-size:12.5px;color:var(--sub);font-weight:800}
+.ingc{display:inline-flex;align-items:center;gap:3px;background:var(--bg);border-radius:999px;padding:2px 10px 2px 4px;font-weight:800;font-size:14px}
+.ingc svg{width:26px;height:26px}
+.ingc rt{font-size:.55em}
+.inglist{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.ingc.sm{font-size:13.5px}
+.plate:disabled{cursor:default}
+.plate .dish svg{width:70%;height:70%}
+.seasons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.sbtn{min-height:70px;border:0;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line),0 6px 12px rgba(36,50,74,.05);font-weight:800;font-size:clamp(20px,5.4vw,24px);color:var(--c);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;border-left:10px solid var(--c);font-family:inherit}
+.sbtn:active{transform:translateY(3px)}
+.sbtn rt{font-size:.5em}
+.sbtn svg{width:34px;height:34px;flex:none}
+.seasons.opts .sbtn{font-size:clamp(17px,4.6vw,21px);justify-content:flex-start;padding:0 12px;gap:8px}
+.seasons.opts .sbtn svg{width:40px;height:40px}
+.seasons.parts .sbtn:last-child{grid-column:1 / -1;justify-content:center}
+.seasons.opts .sbtn svg{background:#fff;border-radius:10px;padding:2px}
+.zgrp h4{display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;color:var(--ink)}
+.zgrp h4 rt{font-size:.55em}
+.zh-ic svg{width:34px;height:34px;display:block}
+.zgrp{margin-top:10px}
+.sbtn.ok{background:var(--c);color:#fff}
+.sbtn.ok rt{color:#fff}
+.sbtn.ok svg.si *,.sbtn.ng svg.si *{fill:#fff;stroke:#fff}
+.sbtn.ng{background:var(--ng);color:#fff;border-left-color:var(--ng)}
+.sbtn.ng rt{color:#ffe3e3}
+.sbtn.dim{opacity:.4}
+.sbtn:disabled{cursor:default}
+.feedback{margin-top:16px;background:#fff;border-radius:20px;padding:16px;box-shadow:0 8px 20px rgba(36,50,74,.08);border-top:7px solid var(--ok)}
+.feedback.ng{border-top-color:var(--ng)}
+.fb-res{font-size:24px;font-weight:800;color:var(--ok)}
+.feedback.ng .fb-res{color:var(--ng)}
+.fb-exp{margin-top:8px;line-height:1.9;font-size:16px}
+.fb-exp rt{font-size:.55em}
+.fb-exp .note{margin-top:6px;background:#FFF7E8;border-radius:12px;padding:8px 12px;font-size:15px}
+.feedback .btn{margin-top:14px}
+.gb{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 12px;font-weight:800;color:#fff;background:var(--c);white-space:nowrap;font-size:.95em;vertical-align:middle;line-height:1.7}
+.gb rt{color:#fff;opacity:.9}
+.gb.out{background:#fff;color:var(--sub);border:2px dashed var(--line);font-size:.85em}
+.flash{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);font-size:84px;pointer-events:none;z-index:60;animation:flash .5s ease-out forwards}
+@keyframes flash{0%{opacity:0;transform:translate(-50%,-40%) scale(.6)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+.tabig{font-size:15px;font-weight:800;color:var(--sub);text-align:center;margin-top:10px}
+
+/* result */
+.rcard{background:#fff;border-radius:24px;padding:24px 18px;text-align:center;box-shadow:0 10px 30px rgba(36,50,74,.08)}
+.stars{font-size:40px;letter-spacing:6px;color:#F5B301}
+.rscore{font-size:46px;font-weight:800;margin-top:4px}
+.rscore small{font-size:20px;color:var(--sub)}
+.rmsg{font-weight:800;font-size:18px;margin-top:6px}
+.rbest{color:var(--accent2);font-weight:800;font-size:14px;margin-top:6px;min-height:1.2em}
+.slist{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.slist li{background:#fff;border-radius:14px;padding:8px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;box-shadow:0 2px 0 var(--line)}
+.slist li svg.fi{width:42px;height:42px;flex:none}
+.slist .nm{font-weight:800;font-size:18px;margin-right:2px}
+.slist .times{margin-left:auto;font-weight:800;color:var(--ng);font-size:14px}
+.empty{color:var(--sub);text-align:center;padding:18px;background:#fff;border-radius:14px}
+
+/* zukan */
+.tabs{margin-bottom:14px}
+.gcols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gcol{background:#fff;border-radius:18px;padding:10px 6px 8px;box-shadow:0 2px 0 var(--line);border-top:8px solid var(--c)}
+.gcol h4{margin:0 0 2px;text-align:center;color:var(--c);font-size:17px}
+.gcol .gd{font-size:11px;color:var(--sub);text-align:center;line-height:1.5;min-height:3em;font-weight:700}
+.gcol .gd rt{font-size:.6em}
+.fgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:2px}
+.fcell{border:0;background:none;padding:4px 2px;width:64px;cursor:pointer;display:flex;flex-direction:column;align-items:center;font-family:inherit;color:var(--ink);border-radius:12px}
+.fcell:hover{background:var(--bg)}
+.fcell svg{width:44px;height:44px}
+.fcell span{font-size:11px;font-weight:700;line-height:1.3;text-align:center;word-break:keep-all;overflow-wrap:anywhere;max-width:100%}
+.zgrp .fcell{width:72px}
+.fcell span rt{font-size:.6em}
+.fcell.sel{background:#FFE9CF}
+.outbox{margin-top:10px;background:#fff;border-radius:18px;padding:10px;box-shadow:0 2px 0 var(--line)}
+.outbox h4{margin:2px 0 6px;font-size:13.5px;color:var(--sub);text-align:center}
+.calwrap{background:#fff;border-radius:22px;padding:8px;box-shadow:0 4px 0 var(--line)}
+.cal{width:100%;max-width:460px;display:block;margin:0 auto;touch-action:manipulation}
+.cal .sw{cursor:pointer}
+.cal .fd{pointer-events:none}
+.cal .fd circle.bg{fill:#fff;stroke:#E4DCCB;stroke-width:1.5}
+.spanel{margin-top:12px;background:#fff;border-radius:18px;padding:10px 8px;box-shadow:0 2px 0 var(--line);border-top:8px solid var(--c)}
+.spanel h4{margin:2px 0 8px;text-align:center;font-size:17px;color:var(--c)}
+.spanel h4 rt{font-size:.55em}
+.spanel .fcell{width:72px}
+.spanel .fcell svg{width:52px;height:52px}
+.spanel .fcell span{font-size:12px}
+.zinfo{position:relative;margin-top:12px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 6px 18px rgba(36,50,74,.1);border-left:7px solid var(--accent2);display:flex;gap:12px;align-items:flex-start}
+.zinfo svg.fi{width:84px;height:84px;flex:none}
+.zinfo .x{position:absolute;right:2px;top:2px;width:44px;height:44px;border:0;background:none;font-size:24px;cursor:pointer;color:var(--sub);border-radius:12px}
+.zinfo .nm{font-size:22px;font-weight:800}
+.zinfo .tg{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.zinfo .ex{font-size:14.5px;line-height:1.85}
+.zinfo .ex rt{font-size:.55em}
+.credit{font-size:11.5px;color:var(--sub);margin-top:24px;line-height:1.7}
+.credit a{color:var(--sub)}
+
+/* sample */
+.smp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.smpcol{background:#fff;border-radius:18px;padding:10px;box-shadow:0 2px 0 var(--line);text-align:center}
+.smpcol h4{margin:2px 0 2px;font-size:16px}
+.smpcol p{margin:0 0 6px;font-size:11.5px;color:var(--sub);line-height:1.5;min-height:3em}
+.smpcol .gr{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.smpcol svg{width:100%;height:auto}
+
+.modal{position:fixed;inset:0;background:rgba(20,30,45,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.modal .box{background:#fff;border-radius:20px;padding:20px;max-width:360px;width:100%;text-align:center;font-weight:700}
+.modal .row{margin-top:16px}
+@media (max-width:420px){
+  main{padding:16px 10px 40px}
+  .plates{gap:6px}
+  .gcol{padding:10px 3px 8px}
+  .fcell{width:50px;padding:3px 0}
+  .fcell svg{width:36px;height:36px}
+  .fcell span{font-size:10px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="logo" id="btn-home" aria-label="タイトルへ"><span class="mk"></span>たべものマスター</button>
+  <span class="spacer"></span>
+  <button class="tbtn" id="tg-furi" aria-pressed="true" aria-label="ふりがな"><span>ふりがな</span><b class="st">オフ</b></button>
+  <button class="tbtn" id="tg-sound" aria-pressed="true" aria-label="おと"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><g class="on"><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></g><g class="off"><path d="M16 9l5 6M21 9l-5 6"/></g></svg><span>おと</span><b class="st">オフ</b></button>
+</header>
+<main>
+  <section class="screen on" id="scr-title">
+    <div class="hero">
+      <svg id="hero-svg" viewBox="0 0 340 170" aria-hidden="true"></svg>
+      <p class="sub" id="hero-sub"></p>
+      <h1>たべものマスター<small data-r="{試作|しさく}"></small></h1>
+    </div>
+    <div class="menu">
+      <button class="btn primary" id="btn-play"><span class="ic" id="ic-play"></span>クイズであそぶ</button>
+      <button class="btn orange" id="btn-zukan"><span class="ic" id="ic-zukan"></span>たべものずかん</button>
+      <button class="btn" id="btn-weak"><span class="ic" id="ic-weak"></span>にがてリスト<span class="cnt hidden" id="weak-cnt">0</span></button>
+    </div>
+    <p class="stat" id="stat"></p>
+    <button class="linkbtn" id="btn-sample" data-r="{絵|え}のみほん（{試作|しさく}で{見|み}てほしいところ）"></button>
+  </section>
+
+  <section class="screen" id="scr-course">
+    <h2>むずかしさ</h2>
+    <div class="seg" id="seg-diff">
+      <button data-d="easy" aria-pressed="false">かんたん</button>
+      <button data-d="normal" aria-pressed="true">ふつう</button>
+      <button data-d="hard" aria-pressed="false">むずかしい</button>
+    </div>
+    <p class="seg-note" id="diff-note"></p>
+    <div class="seg" id="seg-play" style="margin-top:12px">
+      <button data-p="n" aria-pressed="true">10もん</button>
+      <button data-p="ta" aria-pressed="false">タイムアタック（60びょう）</button>
+    </div>
+    <h2 style="margin-top:22px">あそびかたをえらぼう</h2>
+    <div class="course-grid" id="course-grid"></div>
+  </section>
+
+  <section class="screen" id="scr-quiz">
+    <div class="qhead">
+      <span class="qno" id="q-no">1 / 10</span>
+      <div class="pbar" id="q-pbar"><i id="q-bar"></i></div>
+      <span class="qscore" id="q-score">⭕ 0</span>
+    </div>
+    <div class="qcard">
+      <span class="qtag" id="q-tag"></span>
+      <div id="q-food"></div>
+      <div class="qname" id="q-name"></div>
+      <div class="qing hidden" id="q-ing"></div>
+      <div class="qtext" id="q-text"></div>
+      <div class="qtimer hidden" id="q-timer"><i id="q-timer-bar"></i></div>
+    </div>
+    <div id="q-choices"></div>
+    <button class="btn primary hidden" id="q-confirm" style="margin-top:14px">これでけってい</button>
+    <div class="feedback hidden" id="q-fb">
+      <div class="fb-res" id="fb-res"></div>
+      <div class="fb-exp" id="fb-exp"></div>
+      <button class="btn navy" id="btn-next">つぎへ ▶</button>
+    </div>
+  </section>
+
+  <section class="screen" id="scr-kondate">
+    <div class="qhead">
+      <span class="qno" id="k-no"></span>
+      <div class="pbar"><i id="k-bar"></i></div>
+      <span class="qscore" id="k-score"></span>
+    </div>
+    <div class="qcard ktray">
+      <span class="qtag" data-r="こんだてをつくろう"></span>
+      <div class="kodai" id="k-odai"></div>
+      <div class="kslots" id="k-slots"></div>
+      <div class="kmeter" id="k-meter"></div>
+    </div>
+    <div id="k-cats"></div>
+    <button class="btn primary" id="k-done" style="margin-top:16px">できた！</button>
+    <div class="feedback hidden" id="k-fb">
+      <div class="fb-res" id="k-res"></div>
+      <div class="fb-exp" id="k-exp"></div>
+      <button class="btn navy" id="k-next">つぎへ ▶</button>
+    </div>
+  </section>
+
+  <section class="screen" id="scr-result">
+    <div class="rcard">
+      <div class="stars" id="r-stars"></div>
+      <div class="rscore" id="r-score"></div>
+      <div class="rmsg" id="r-msg"></div>
+      <div class="rbest" id="r-best"></div>
+    </div>
+    <h3 id="r-wrong-h">まちがえたもの</h3>
+    <ul class="slist" id="r-wrong"></ul>
+    <div class="menu">
+      <button class="btn primary" id="btn-retry">もういちど</button>
+      <div class="row">
+        <button class="btn" id="btn-course2">あそびかたをかえる</button>
+        <button class="btn" id="btn-title2">タイトルへ</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="scr-zukan">
+    <h2>たべものずかん</h2>
+    <div class="zprog" id="z-prog"></div>
+    <div class="seg tabs" id="z-tabs">
+      <button data-t="g" aria-pressed="true" data-r="なかま"></button>
+      <button data-t="s" aria-pressed="false" data-r="しゅん"></button>
+      <button data-t="m" aria-pressed="false" data-r="もと"></button>
+      <button data-t="p" aria-pressed="false" data-r="どこ"></button>
+      <button data-t="r" aria-pressed="false" data-r="りょうり"></button>
+      <button data-t="e" aria-pressed="false" data-r="ぎょうじ"></button>
+    </div>
+    <div id="z-g"></div>
+    <div id="z-mp" class="hidden"></div>
+    <div id="z-s" class="hidden">
+      <div class="calwrap"><svg class="cal" id="z-cal" viewBox="-34 -34 428 428"></svg></div>
+      <p class="seg-note" id="z-cal-note"></p>
+      <div id="z-spanel"></div>
+    </div>
+    <div class="zinfo hidden" id="z-info"></div>
+    <p class="credit" id="credit"></p>
+  </section>
+
+  <section class="screen" id="scr-weak">
+    <h2>にがてリスト</h2>
+    <p style="color:var(--sub);font-size:14px;margin-top:-6px;line-height:1.8" data-r="クイズでまちがえたものがたまります。ふくしゅうで{正解|せいかい}するとへっていきます。"></p>
+    <div class="row" style="margin:12px 0 16px">
+      <button class="btn primary" id="btn-weak-play">ふくしゅうする</button>
+      <button class="btn ghost" id="btn-weak-clear">リストをけす</button>
+    </div>
+    <ul class="slist" id="weak-list"></ul>
+  </section>
+
+  <section class="screen" id="scr-sample">
+    <h2 data-r="{絵|え}のみほん"></h2>
+    <p style="color:var(--sub);font-size:14px;margin-top:-6px;line-height:1.9" data-r="おなじ{形|かたち}を3とおりの{描|か}き{方|かた}でならべました。いまのクイズとずかんは A で{描|か}いています。{形|かたち}は3つとも{同|おな}じなので、どれに{決|き}めても52{品|ひん}ぜんぶをすぐに{切|き}りかえられます。"></p>
+    <div class="smp" id="smp"></div>
+  </section>
+</main>
+
+<script id="food-data" type="application/json">{{FOOD_DATA}}</script>
+
+<script id="dish-data" type="application/json">{{DISH_DATA}}</script>
+<script id="event-data" type="application/json">{{EVENT_DATA}}</script>
+
+<script>
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const rnd = n => Math.floor(Math.random() * n);
+const sample = a => a[rnd(a.length)];
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ---------- data ---------- */
+const DATA = JSON.parse($('#food-data').textContent);
+const FOODS = DATA.foods;
+const F = Object.fromEntries(FOODS.map(f => [f.id, f]));
+// 料理：色は、料理の分類ではなく入っている食材の色で数える
+const CKEYS = ['r', 'y', 'g'];
+const colorsOf = ids => CKEYS.filter(c => ids.some(id => F[id] && F[id].g === c)).join('');
+const DISHES = JSON.parse($('#dish-data').textContent).dishes;
+DISHES.forEach(d => { d.kind = 'dish'; d.d = colorsOf(d.ing); F[d.id] = d; });
+const EVENTS = JSON.parse($('#event-data').textContent).events;
+EVENTS.forEach(e => { e.kind = 'event'; e.e = e.ev; F[e.id] = e; });
+// 献立の分け方：主食・主菜・副菜は食事バランスガイドの区分、料理ごとの分類は農林水産省の料理イラスト集に合わせ、汁物を4つ目の枠にした
+// st：wa 和食・yo 洋食（パンの日に和食をまぜない）、kx：こんだての候補に出さない（めん・おにぎり）
+const KC = {
+  shu: { n: '{主食|しゅしょく}', d: 'ごはん・パン・めん' },
+  sai: { n: '{主菜|しゅさい}', d: '{肉|にく}・{魚|さかな}・たまご・{大豆|だいず}のおかず' },
+  fuku: { n: '{副菜|ふくさい}', d: 'やさい・いも・きのこのおかず' },
+  shiru: { n: '{汁物|しるもの}', d: 'みそしる・スープ' },
+};
+const KKEYS = Object.keys(KC);
+const KZ = { ...KC, one: { n: 'これ1つで{主食|しゅしょく}とおかずになる{料理|りょうり}' }, both: { n: '{主菜|しゅさい}にも{副菜|ふくさい}にもなる{料理|りょうり}' } };
+const GROUPS = {
+  r: { c: 'var(--red)', hex: '#E8504A', n: '{赤|あか}', sh: '{体|からだ}をつくる', d: 'おもに{体|からだ}をつくるもとになる', ex: 'にく・さかな・たまご・{牛乳|ぎゅうにゅう}・{豆|まめ}など' },
+  y: { c: 'var(--yel)', hex: '#F2B200', n: '{黄|き}', sh: 'エネルギーになる', d: 'おもにエネルギーのもとになる', ex: 'ごはん・パン・めん・いも・{油|あぶら}・さとうなど' },
+  g: { c: 'var(--grn)', hex: '#3DAA5C', n: '{緑|みどり}', sh: '{調子|ちょうし}をととのえる', d: 'おもに{体|からだ}の{調子|ちょうし}をととのえるもとになる', ex: 'やさい・くだもの・きのこなど' },
+};
+const SEASONS = {
+  haru: { c: 'var(--haru)', hex: '#E86A9A', n: '{春|はる}', kn: 'はる', months: [3, 4, 5], light: '#FDE7F0' },
+  natsu: { c: 'var(--natsu)', hex: '#1E9BC9', n: '{夏|なつ}', kn: 'なつ', months: [6, 7, 8], light: '#E0F3FA' },
+  aki: { c: 'var(--aki)', hex: '#D9772B', n: '{秋|あき}', kn: 'あき', months: [9, 10, 11], light: '#FCEBDC' },
+  fuyu: { c: 'var(--fuyu)', hex: '#6C7FD1', n: '{冬|ふゆ}', kn: 'ふゆ', months: [12, 1, 2], light: '#E6EAFA' },
+};
+const SKEYS = ['haru', 'natsu', 'aki', 'fuyu'];
+// もと（なにからできている？）
+const BASES = {
+  daizu: { n: '{大豆|だいず}', g: 'r', icon: 'daizu' },
+  milk: { n: '{牛乳|ぎゅうにゅう}', g: 'r', icon: 'milk' },
+  kome: { n: 'お{米|こめ}', g: 'y', icon: 'kome' },
+  komugi: { n: '{小麦|こむぎ}', g: 'y', icon: 'komugi' },
+  sakana: { n: '{魚|さかな}', g: 'r', icon: 'aji' },
+};
+const BKEYS = Object.keys(BASES);
+// どこを食べてる？（農林水産省「子どもの食育」と文部科学省「食生活学習教材」の分け方。地上の茎と地下の茎はまとめて「茎」。花のつぼみに、花びらを食べる食用ぎくをくわえて「花・つぼみ」）
+const PARTS = {
+  tsubomi: { n: '{花|はな}・つぼみ', sh: '{花|はな}・つぼみ' },
+  mi: { n: '{実|み}', sh: '{実|み}' },
+  ha: { n: '{葉|は}', sh: '{葉|は}' },
+  kuki: { n: '{茎|くき}', sh: '{茎|くき}' },
+  ne: { n: '{根|ね}', sh: '{根|ね}' },
+};
+const PKEYS = Object.keys(PARTS);
+// モードごとの決まり：どの項目が答えか、まちがえやすい印、出題の見出し
+const MODES = {
+  g: { key: 'g', tr: 'tr', tag: 'なかま{分|わ}け', q: 'どのお{皿|さら}のなかま？' },
+  s: { key: 's', tr: null, tag: 'しゅん', q: 'いちばんおいしい{季節|きせつ}（しゅん）は？' },
+  m: { key: 'm', tr: 'mt', tag: 'もとはなに？', q: 'なにからできている？' },
+  p: { key: 'p', tr: 'pt', tag: 'どこを{食|た}べてる？', q: 'どこを{食|た}べている？' },
+  e: { key: 'e', tr: null, tag: '{行事|ぎょうじ}のたべもの', q: '' },
+  d: { key: 'd', tr: null, tag: 'りょうりのなかま{分|わ}け', q: 'この{料理|りょうり}に{入|はい}っている{色|いろ}を、ぜんぶえらぼう' },
+};
+
+/* ---------- storage ---------- */
+const store = {
+  key: 'tabemono-master-v1',
+  d: { furi: true, sound: true, diff: 'normal', play: 'n', weak: {}, best: {}, got: {} },
+  load() { try { const v = JSON.parse(localStorage.getItem(this.key) || 'null'); if (v) Object.assign(this.d, v); } catch (e) { } this.d.sound = true; },   // おとは開くたびにオンから始める（オフは覚えない）
+  save() { try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (e) { } },
+};
+store.load();
+function weakItems() {
+  return Object.entries(store.d.weak).map(([k, v]) => { const [m, id] = k.split(':'); return { k, m, id, n: v }; })
+    .filter(o => o.n > 0 && F[o.id] && MODES[o.m] && F[o.id][o.m]).sort((a, b) => b.n - a.n);
+}
+
+/* ---------- sound ---------- */
+let actx = null;
+// スマホのブラウザやアプリ内の表示では、音の仕組みが止まった状態で始まることがある。
+// 最初のタップで作って動かし、無音を一度鳴らしておく（iPhone 向け）。止まっていたら鳴らす前に動かし直す。
+function audioCtx() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    actx = new AC();
+    try { const b = actx.createBuffer(1, 1, 22050), src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0); } catch (e) { }
+  }
+  if (actx.state !== 'running') { try { actx.resume(); } catch (e) { } }
+  return actx;
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (store.d.sound) audioCtx(); }, { capture: true, passive: true }));
+function playNotes(kind) {
+  const t = actx.currentTime + .01;
+  const notes = kind === 'ok' ? [[784, 0], [1047, .1]] : kind === 'ng' ? [[262, 0], [196, .13]] : kind === 'fan' ? [[523, 0], [659, .12], [784, .24], [1047, .36]] : [[880, 0]];
+  notes.forEach(([f, dt]) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = kind === 'ng' ? 'square' : 'triangle'; o.frequency.value = f;
+    const peak = kind === 'ng' ? .06 : kind === 'tap' ? .05 : .16;   // シリーズのほかの作品と同じ大きさ
+    g.gain.setValueAtTime(.0001, t + dt); g.gain.exponentialRampToValueAtTime(peak, t + dt + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dt + .24);
+    o.connect(g).connect(actx.destination); o.start(t + dt); o.stop(t + dt + .26);
+  });
+}
+function beep(kind) {
+  if (!store.d.sound) return;
+  try {
+    const c = audioCtx(); if (!c) return;
+    if (c.state === 'running') playNotes(kind);
+    else c.resume().then(() => playNotes(kind)).catch(() => { });
+  } catch (e) { }
+}
+
+/* ---------- ruby ---------- */
+// {漢字|よみ} を <ruby> に。ふりがなオフのときは漢字だけ。
+const R = s => esc(s).replace(/\{([^|}]+)\|([^}]+)\}/g, (_, a, b) => store.d.furi ? `<ruby>${a}<rt>${b}</rt></ruby>` : a);
+const plain = s => String(s).replace(/\{([^|}]+)\|([^}]+)\}/g, '$1');
+const gBadge = g => `<span class="gb" style="--c:${GROUPS[g].c}">${R(GROUPS[g].n)}</span>`;
+function applyStatic() { $$('[data-r]').forEach(e => { e.innerHTML = R(e.dataset.r); }); }
+const mBadge = k => `<span class="gb" style="--c:var(--navy)">${R(BASES[k].n)}</span>`;
+const pBadge = k => `<span class="gb" style="--c:#3F7A3A">${R(PARTS[k].n)}</span>`;
+const sBadge = s => `<span class="gb" style="--c:${SEASONS[s].c}">${R(SEASONS[s].n)}</span>`;
+
+/* ---------- illustrations (自前 SVG、viewBox 0 0 100 100) ---------- */
+// 形は fill だけで書き、線は描き方（A/B/C）でまとめて付ける。face は C（顔つき）のときの顔の位置。
+const ICONS = {
+  gohan: { face: [50, 70], s: `<path d="M36 83 H64 L62 91 H38Z" fill="#B8433F"/><path d="M17 52 Q18 27 50 25 Q82 27 83 52Z" fill="#FFFFFF"/><path d="M32 40 l4 -2 M47 33 l4 1 M63 40 l4 -1 M41 46 l3 2 M58 46 l3 -2" stroke="#E2D9C8" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M11 52 H89 Q87 83 50 85 Q13 83 11 52Z" fill="#E15A4F"/><path d="M22 62 Q50 70 78 62" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none"/>` },
+  pan: { face: [50, 58], s: `<path d="M18 42 Q16 18 50 17 Q84 18 82 42 Q82 49 75 50 V86 H25 V50 Q18 49 18 42Z" fill="#D49A52"/><path d="M27 43 Q26 27 50 26 Q74 27 73 43 Q73 48 67 50 V78 H33 V50 Q27 48 27 43Z" fill="#FBE8C4" stroke="none"/>` },
+  jagaimo: { face: [52, 56], s: `<path d="M20 55 Q18 30 45 26 Q74 22 82 45 Q88 70 62 78 Q30 86 20 55Z" fill="#D9B46A"/><ellipse cx="38" cy="38" rx="7" ry="4" fill="#fff" opacity=".35" stroke="none"/><circle cx="30" cy="60" r="2" fill="#9C7A3C" stroke="none"/><circle cx="70" cy="40" r="2" fill="#9C7A3C" stroke="none"/><circle cx="66" cy="68" r="2" fill="#9C7A3C" stroke="none"/>` },
+  satsumaimo: { face: [50, 55], s: `<path d="M9 64 L3 68 M88 44 L96 40" stroke-width="3" fill="none"/><path d="M10 62 Q14 40 40 34 Q66 28 86 40 Q94 46 88 52 Q74 70 44 72 Q20 76 10 62Z" fill="#A8326E"/><path d="M28 49 Q32 53 29 57 M60 42 Q63 46 60 50" stroke="#7E2253" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="40" cy="42" rx="9" ry="3" fill="#fff" opacity=".3" stroke="none"/>` },
+  tamago: { face: [50, 62], s: `<path d="M50 14 Q76 16 80 56 Q82 86 50 88 Q18 86 20 56 Q24 16 50 14Z" fill="#FFF6E3"/><ellipse cx="38" cy="36" rx="6" ry="10" fill="#fff" stroke="none" transform="rotate(20 38 36)"/>` },
+  milk: { face: [50, 47], s: `<rect x="44" y="9" width="12" height="8" rx="2" fill="#4A90D9"/><path d="M28 36 L36 16 H64 L72 36Z" fill="#FFFFFF"/><rect x="28" y="36" width="44" height="52" rx="3" fill="#FFFFFF"/><rect x="28" y="60" width="44" height="17" fill="#4A90D9"/><path d="M36 68 h28" stroke="#fff" stroke-width="3" stroke-linecap="round"/>` },
+  tofu: { face: [34, 64], s: `<path d="M18 38 L50 24 L82 38 L50 52Z" fill="#FFFFFF"/><path d="M18 38 L50 52 V84 L18 70Z" fill="#F1F2EA"/><path d="M82 38 L50 52 V84 L82 70Z" fill="#DCE0D2"/>` },
+  sanma: { face: null, s: `<path d="M88 50 L97 41 L95 50 L97 59Z" fill="#6F8AA3"/><path d="M10 52 Q30 37 70 43 Q82 45 88 50 Q82 56 70 58 Q30 65 10 52Z" fill="#9FB4C7"/><path d="M14 55 Q40 63 78 55" stroke="#EEF2F6" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M10 52 L3 50" stroke-width="3"/><circle cx="20" cy="49" r="3.4" fill="#24324A" stroke="none"/><circle cx="21" cy="48" r="1" fill="#fff" stroke="none"/><path d="M30 44 Q34 50 31 56" stroke="#6F8AA3" stroke-width="2.4" fill="none"/>` },
+  tomato: { face: [50, 62], s: `<circle cx="50" cy="56" r="33" fill="#E8483F"/><ellipse cx="34" cy="48" rx="6" ry="9" fill="#fff" opacity=".4" stroke="none"/><path d="M50 26 V13" stroke="#2E7D45" stroke-width="4" stroke-linecap="round"/><path d="M50 25 L57 17 L58 28 L69 24 L62 33 L50 31 L38 33 L31 24 L42 28 L43 17Z" fill="#3DA35A"/>` },
+  kyuri: { face: [50, 54], s: `<path d="M14 70 Q12 62 22 58 L76 30 Q86 26 89 34 Q91 42 82 46 L28 74 Q18 78 14 70Z" fill="#4C9A3E"/><g fill="#2F6B27" stroke="none"><circle cx="30" cy="64" r="1.6"/><circle cx="42" cy="56" r="1.6"/><circle cx="56" cy="50" r="1.6"/><circle cx="70" cy="42" r="1.6"/><circle cx="36" cy="70" r="1.6"/><circle cx="62" cy="57" r="1.6"/></g><circle cx="88" cy="33" r="4.5" fill="#F5D33F"/>` },
+  ninjin: { face: [50, 46], s: `<path d="M50 31 Q40 10 33 14 Q42 18 46 31Z M50 31 Q49 5 56 7 Q53 18 53 31Z M53 31 Q63 12 69 16 Q61 22 55 31Z" fill="#4CA04A"/><path d="M37 31 Q50 26 63 31 Q60 62 50 93 Q40 62 37 31Z" fill="#F0862E"/><path d="M42 44 h6 M53 55 h5 M45 66 h5" stroke="#C9661B" stroke-width="2.5" stroke-linecap="round"/>` },
+  broccoli: { face: [50, 50], s: `<path d="M42 58 H58 L63 91 H37Z" fill="#9CCB6B"/><circle cx="29" cy="47" r="16" fill="#3E8E41"/><circle cx="71" cy="47" r="16" fill="#3E8E41"/><circle cx="50" cy="34" r="19" fill="#3E8E41"/><circle cx="50" cy="55" r="15" fill="#3E8E41"/><g fill="#5DB55F" stroke="none"><circle cx="44" cy="26" r="3"/><circle cx="24" cy="42" r="2.6"/><circle cx="74" cy="40" r="2.6"/></g>` },
+  shimeji: { face: [50, 33], s: `<rect x="23" y="48" width="10" height="38" rx="5" fill="#F3EBDD"/><rect x="67" y="50" width="10" height="36" rx="5" fill="#F3EBDD"/><rect x="45" y="38" width="10" height="50" rx="5" fill="#F3EBDD"/><ellipse cx="28" cy="47" rx="15" ry="10" fill="#8E7357"/><ellipse cx="72" cy="49" rx="15" ry="10" fill="#8E7357"/><ellipse cx="50" cy="34" rx="20" ry="14" fill="#9A8064"/><path d="M30 88 H70" stroke-width="3"/>` },
+  ichigo: { face: [50, 54], s: `<path d="M50 90 Q18 66 20 42 Q22 27 50 29 Q78 27 80 42 Q82 66 50 90Z" fill="#E43D4F"/><g fill="#FBE08A" stroke="none"><ellipse cx="34" cy="44" rx="1.5" ry="2.4"/><ellipse cx="50" cy="40" rx="1.5" ry="2.4"/><ellipse cx="66" cy="44" rx="1.5" ry="2.4"/><ellipse cx="40" cy="62" rx="1.5" ry="2.4"/><ellipse cx="60" cy="62" rx="1.5" ry="2.4"/><ellipse cx="50" cy="76" rx="1.5" ry="2.4"/><ellipse cx="30" cy="54" rx="1.5" ry="2.4"/><ellipse cx="70" cy="54" rx="1.5" ry="2.4"/></g><path d="M29 31 Q40 18 50 27 Q60 18 71 31 Q60 34 50 31 Q40 34 29 31Z" fill="#3DA35A"/>` },
+  mikan: { face: [50, 60], s: `<circle cx="50" cy="57" r="32" fill="#F39A1E"/><ellipse cx="36" cy="46" rx="6" ry="8" fill="#fff" opacity=".35" stroke="none"/><path d="M50 26 Q62 9 77 15 Q67 29 50 26Z" fill="#3DA35A"/><circle cx="50" cy="26" r="3.5" fill="#7A9B2E"/>` },
+  suika: { face: [50, 52], s: `<path d="M8 38 H92 Q90 86 50 88 Q10 86 8 38Z" fill="#2E8B3E"/><path d="M14 38 H86 Q84 80 50 82 Q16 80 14 38Z" fill="#F7F3E3" stroke="none"/><path d="M17 38 H83 Q81 76 50 78 Q19 76 17 38Z" fill="#F0464F" stroke="none"/><g fill="#24324A" stroke="none"><ellipse cx="32" cy="50" rx="2" ry="3"/><ellipse cx="68" cy="50" rx="2" ry="3"/><ellipse cx="40" cy="66" rx="2" ry="3"/><ellipse cx="60" cy="66" rx="2" ry="3"/></g>` },
+  daikon: { face: [50, 62], s: `<path d="M44 34 Q30 12 22 16 Q33 22 40 34Z M50 33 Q47 6 56 6 Q56 18 54 33Z M56 34 Q70 12 78 16 Q66 24 60 34Z" fill="#4CA04A"/><path d="M38 34 Q50 30 62 34 Q66 70 54 90 Q50 94 46 90 Q34 70 38 34Z" fill="#FAFAF4"/><path d="M39 35 Q50 31 61 35 L61 43 Q50 40 39 43Z" fill="#D5E8B5" stroke="none"/><path d="M44 58 h5 M51 72 h4" stroke="#D9D6C8" stroke-width="2.2" stroke-linecap="round"/>` },
+  kabocha: { face: [50, 62], fc: '#fff', s: `<path d="M46 34 L48 17 H56 L54 34Z" fill="#8A6A3B"/><ellipse cx="50" cy="59" rx="39" ry="28" fill="#3F6B3A"/><path d="M50 31 Q38 59 50 87 M29 35 Q18 59 29 83 M71 35 Q82 59 71 83" stroke="#2C4F29" stroke-width="2.6" fill="none"/><ellipse cx="34" cy="48" rx="6" ry="4" fill="#fff" opacity=".2" stroke="none"/>` },
+  banana: { face: null, s: `<path d="M14 40 L17 29 L25 36Z" fill="#6B5A2E"/><path d="M14 40 Q18 76 54 80 Q80 80 90 60 Q76 68 56 66 Q30 62 24 36Z" fill="#F7D046"/><path d="M26 46 Q34 64 56 70" stroke="#E0B52E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M90 60 L95 62" stroke-width="4"/>` },
+  ringo: { face: [50, 60], s: `<path d="M50 33 Q50 20 54 12" stroke="#6B4A2E" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M54 22 Q66 9 77 15 Q67 28 54 22Z" fill="#4CA04A"/><path d="M50 33 Q66 21 80 35 Q92 55 76 79 Q64 92 50 85 Q36 92 24 79 Q8 55 20 35 Q34 21 50 33Z" fill="#D93A3A"/><ellipse cx="32" cy="48" rx="5" ry="9" fill="#fff" opacity=".35" stroke="none"/>` },
+};
+Object.assign(ICONS, {
+  udon: { face: [50, 68], fc: '#fff', s: `<path d="M36 82 H64 L62 90 H38Z" fill="#6E452D"/><path d="M12 48 H88 Q86 82 50 84 Q14 82 12 48Z" fill="#8B5A3C"/><ellipse cx="50" cy="48" rx="38" ry="10" fill="#E8C686"/><path d="M20 47 Q26 42 32 47 T44 47 T56 47 T68 47 T80 47 M26 51 Q32 46 38 51 T50 51 T62 51 T74 51" stroke="#FFFBF0" stroke-width="3.2" fill="none" stroke-linecap="round"/><g fill="#5DB55F" stroke="none"><circle cx="40" cy="43" r="2.4"/><circle cx="58" cy="44" r="2.4"/><circle cx="66" cy="49" r="2.2"/></g>` },
+  pasta: { face: [50, 60], s: `<ellipse cx="50" cy="64" rx="42" ry="22" fill="#FFFFFF"/><ellipse cx="50" cy="64" rx="30" ry="14" fill="none" stroke="#EFEAE0" stroke-width="2"/><ellipse cx="50" cy="55" rx="29" ry="17" fill="#F2D27A"/><path d="M28 56 Q50 40 72 56 M32 62 Q50 50 68 62 M36 50 Q50 43 64 50" stroke="#D9B24E" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M38 48 Q50 38 62 48 Q58 54 50 54 Q42 54 38 48Z" fill="#E8483F"/><g fill="#5DB55F" stroke="none"><circle cx="46" cy="45" r="1.8"/><circle cx="55" cy="47" r="1.8"/></g>` },
+  mochi: { face: [37, 60], s: `<rect x="44" y="26" width="40" height="34" rx="9" fill="#FFFDF5"/><path d="M58 30 q6 -4 10 0" stroke="#E9D9B4" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="16" y="40" width="42" height="36" rx="9" fill="#FFFFFF"/>` },
+  butter: { face: [39, 66], s: `<ellipse cx="50" cy="72" rx="42" ry="14" fill="#E9F0F6"/><path d="M24 54 L50 44 L80 52 L54 62Z" fill="#FFE58A"/><path d="M24 54 L54 62 V76 L24 68Z" fill="#F7D35A"/><path d="M54 62 L80 52 V66 L54 76Z" fill="#E8C140"/>` },
+  satou: { face: null, s: `<path d="M14 52 L32 43 L50 52 L32 61Z" fill="#FFFFFF"/><path d="M14 52 L32 61 V81 L14 72Z" fill="#EEF0F2"/><path d="M50 52 L32 61 V81 L50 72Z" fill="#DDE2E6"/><path d="M50 52 L68 43 L86 52 L68 61Z" fill="#FFFFFF"/><path d="M50 52 L68 61 V81 L50 72Z" fill="#EEF0F2"/><path d="M86 52 L68 61 V81 L86 72Z" fill="#DDE2E6"/><path d="M32 30 L50 21 L68 30 L50 39Z" fill="#FFFFFF"/><path d="M32 30 L50 39 V59 L32 50Z" fill="#EEF0F2"/><path d="M68 30 L50 39 V59 L68 50Z" fill="#DDE2E6"/>` },
+  butaniku: { face: [50, 50], s: `<path d="M14 56 Q12 34 40 30 Q70 26 84 42 Q92 60 74 72 Q50 84 28 76 Q14 70 14 56Z" fill="#F4A3A8"/><path d="M22 70 Q48 82 76 70" stroke="#FFF3F0" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M30 40 Q36 44 34 50 M66 38 Q62 44 68 48" stroke="#FBD3D5" stroke-width="2.5" fill="none" stroke-linecap="round"/>` },
+  toriniku: { face: [45, 46], s: `<path d="M52 62 L60 56 L76 76 L68 82Z" fill="#FFFBF2"/><circle cx="74" cy="86" r="6" fill="#FFFBF2"/><circle cx="81" cy="79" r="6" fill="#FFFBF2"/><path d="M30 70 Q16 50 32 32 Q48 18 66 30 Q80 44 68 62 Q60 72 50 72 Q38 76 30 70Z" fill="#E9B27A"/><ellipse cx="38" cy="38" rx="7" ry="4" fill="#fff" opacity=".35" stroke="none" transform="rotate(-30 38 38)"/>` },
+  yogurt: { face: [50, 77], s: `<path d="M24 34 H76 L70 86 H30Z" fill="#FFFFFF"/><path d="M25.5 48 H74.5 L72.6 66 H27.4Z" fill="#7FB8E8"/><path d="M38 57 h24" stroke="#fff" stroke-width="3" stroke-linecap="round"/><ellipse cx="50" cy="34" rx="28" ry="7" fill="#E6EEF5"/>` },
+  cheese: { face: [52, 63], s: `<path d="M12 50 L88 42 V72 L12 80Z" fill="#F7C93F"/><path d="M12 50 L60 24 L88 42Z" fill="#FFE07A"/><g fill="#E0AE2A" stroke="none"><ellipse cx="24" cy="70" rx="5" ry="4"/><ellipse cx="76" cy="62" rx="4" ry="5"/><ellipse cx="62" cy="34" rx="5" ry="2.6"/></g>` },
+  natto: { face: [50, 70], s: `<path d="M14 50 H86 Q84 84 50 86 Q16 84 14 50Z" fill="#DDE9F5"/><ellipse cx="50" cy="50" rx="36" ry="10" fill="#9A6634"/><g fill="#C48A48"><circle cx="30" cy="49" r="4"/><circle cx="40" cy="45" r="4"/><circle cx="52" cy="47" r="4"/><circle cx="64" cy="45" r="4"/><circle cx="72" cy="50" r="4"/><circle cx="46" cy="53" r="4"/><circle cx="60" cy="53" r="4"/></g><path d="M40 44 Q44 26 54 18 M60 44 Q64 30 72 22" stroke="#D9C9A0" stroke-width="1.6" fill="none"/><path d="M20 62 Q50 70 80 62" stroke="#fff" stroke-opacity=".7" stroke-width="3" fill="none"/>` },
+  sake: { face: null, s: `<path d="M10 58 Q14 40 40 36 Q70 32 90 44 Q86 66 60 72 Q30 78 10 58Z" fill="#F58A5C"/><path d="M12 60 Q30 76 60 70 Q84 64 88 46" stroke="#8C9BA8" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M30 44 Q38 54 32 66 M48 40 Q56 52 50 68 M66 38 Q74 50 68 64" stroke="#FFD2BC" stroke-width="3" fill="none" stroke-linecap="round"/>` },
+  aji: { face: null, s: `<path d="M82 50 L96 38 L92 50 L96 62Z" fill="#6E8597"/><path d="M10 52 Q26 30 56 32 Q76 34 84 50 Q76 66 56 68 Q26 72 10 52Z" fill="#B7C6D2"/><path d="M15 46 Q30 33 56 33.5 Q74 35 82 46 Q56 42 15 46Z" fill="#6E8597" stroke="none"/><path d="M34 54 Q56 50 80 52" stroke="#D9C46A" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M30 42 Q34 50 31 58" stroke="#6E8597" stroke-width="2.2" fill="none"/><circle cx="20" cy="50" r="3.4" fill="#24324A" stroke="none"/><circle cx="21" cy="49" r="1" fill="#fff" stroke="none"/>` },
+  buri: { face: null, s: `<path d="M84 50 L97 36 L92 50 L97 64Z" fill="#4E6A8C"/><path d="M8 52 Q28 30 62 34 Q80 36 86 50 Q80 64 62 66 Q28 74 8 52Z" fill="#C9D4DE"/><path d="M13 46 Q30 32 62 35 Q78 37 84 46 Q56 42 13 46Z" fill="#4E6A8C" stroke="none"/><path d="M16 50 Q50 46 84 50" stroke="#F2C230" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M28 42 Q32 50 29 58" stroke="#4E6A8C" stroke-width="2.2" fill="none"/><circle cx="18" cy="51" r="3.4" fill="#24324A" stroke="none"/><circle cx="19" cy="50" r="1" fill="#fff" stroke="none"/>` },
+  asari: { face: [50, 62], s: `<path d="M42 27 Q50 18 58 27Z" fill="#CDB792"/><path d="M50 25 Q86 30 88 64 Q70 80 50 80 Q30 80 12 64 Q14 30 50 25Z" fill="#E8D6B5"/><path d="M50 30 L50 78 M50 30 L33 77 M50 30 L67 77 M50 30 L20 67 M50 30 L80 67" stroke="#C9B38E" stroke-width="1.8" fill="none"/><path d="M22 48 L30 42 L38 50 L46 42 L54 50 L62 42 L70 50 L78 44" stroke="#7A6248" stroke-width="2.6" fill="none" stroke-linejoin="round"/>` },
+  kakikai: { face: null, s: `<path d="M14 54 Q12 30 38 24 Q66 18 84 34 Q94 56 76 72 Q52 86 30 78 Q14 70 14 54Z" fill="#A7A39A"/><path d="M26 54 Q26 36 46 34 Q68 32 74 46 Q78 62 60 68 Q38 74 26 54Z" fill="#F1EADB"/><path d="M32 52 Q37 46 42 52 T52 52 T62 51 T70 50" stroke="#8E8778" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="44" cy="42" rx="7" ry="3" fill="#fff" opacity=".6" stroke="none"/>` },
+  ebi: { face: null, s: `<path d="M70 28 Q86 20 94 8 M70 34 Q88 32 96 22" stroke="#C94F30" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M56 78 L70 93 L62 76 L76 82Z" fill="#E5603A"/><path d="M72 28 Q40 16 26 40 Q14 62 32 78 Q44 86 58 80 L52 70 Q42 72 38 64 Q34 52 44 44 Q54 36 70 42Z" fill="#F07A4F"/><path d="M31 43 L43 50 M24 56 L37 58 M28 69 L40 64" stroke="#C94F30" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="63" cy="32" r="2.8" fill="#24324A" stroke="none"/>` },
+  maguro: { face: null, s: `<path d="M86 50 L98 30 Q93 50 98 70Z" fill="#2E4566"/><path d="M8 50 Q30 26 64 30 Q82 34 88 50 Q82 66 64 70 Q30 74 8 50Z" fill="#3E5A80"/><path d="M12 54 Q36 70 64 68 Q80 64 86 54 Q50 60 12 54Z" fill="#C9D3DE" stroke="none"/><path d="M68 31 l4 -5 l1 6Z M75 33 l4 -4 l0 6Z M68 69 l4 5 l1 -6Z M75 67 l4 4 l0 -6Z" fill="#F2C230" stroke-width="1.5"/><circle cx="19" cy="47" r="3.4" fill="#fff" stroke="none"/><circle cx="19" cy="47" r="2" fill="#24324A" stroke="none"/>` },
+  soramame: { face: null, s: `<path d="M10 60 Q20 34 50 34 Q80 34 90 52 Q82 70 50 70 Q22 72 10 60Z" fill="#7CBF4A"/><path d="M18 58 Q26 42 50 42 Q74 42 82 54 Q74 64 50 64 Q26 66 18 58Z" fill="#F6F8EC" stroke="none"/><ellipse cx="33" cy="54" rx="9" ry="7" fill="#A8D46A"/><ellipse cx="51" cy="53" rx="9" ry="7" fill="#A8D46A"/><ellipse cx="69" cy="54" rx="9" ry="7" fill="#A8D46A"/><path d="M30 50 h6 M48 49 h6 M66 50 h6" stroke="#5B7F2E" stroke-width="2.2" stroke-linecap="round"/>` },
+  nanohana: { face: null, s: `<path d="M40 90 V40 M52 90 V30 M64 90 V44" stroke="#3F8F3F" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 72 Q24 62 22 48 Q36 54 40 64Z M64 74 Q80 66 80 52 Q68 58 64 66Z" fill="#5BAE4E"/><g fill="#F6D33C"><circle cx="40" cy="36" r="7"/><circle cx="33" cy="42" r="5"/><circle cx="47" cy="42" r="5"/><circle cx="52" cy="25" r="7"/><circle cx="45" cy="31" r="5"/><circle cx="59" cy="31" r="5"/><circle cx="64" cy="40" r="7"/><circle cx="57" cy="46" r="5"/><circle cx="71" cy="46" r="5"/></g>` },
+  takenoko: { face: null, s: `<path d="M50 12 Q66 40 72 70 Q74 88 50 88 Q26 88 28 70 Q34 40 50 12Z" fill="#B88A55"/><path d="M29 78 Q50 90 71 78 Q72 88 50 89 Q28 88 29 78Z" fill="#F2DEB8" stroke="none"/><path d="M39 46 Q50 38 61 46 M33 60 Q50 51 67 60 M30 74 Q50 65 70 74" stroke="#8A6236" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M50 12 Q56 22 58 30 Q50 26 42 30 Q44 22 50 12Z" fill="#8DBB4C"/>` },
+  asparagus: { face: null, s: `<path d="M33 90 L35 32 Q38 20 41 32 L43 90Z" fill="#6DAA45"/><path d="M57 90 L59 32 Q62 20 65 32 L67 90Z" fill="#6DAA45"/><path d="M45 92 L47 24 Q50 10 53 24 L55 92Z" fill="#7BBB50"/><g fill="#9A7AB0" stroke="none"><path d="M35.5 32 Q38 18 40.5 32Z"/><path d="M47.5 24 Q50 8 52.5 24Z"/><path d="M59.5 32 Q62 18 64.5 32Z"/></g><path d="M35 50 l4 -3 M41 64 l-4 -3 M47 44 l4 -3 M53 58 l-4 -3 M59 52 l4 -3 M65 66 l-4 -3" stroke="#3F7A2B" stroke-width="2" stroke-linecap="round"/><rect x="30" y="70" width="40" height="7" rx="2" fill="#E8504A"/>` },
+  piman: { face: [50, 58], s: `<path d="M46 26 Q48 14 56 12 L58 16 Q52 18 54 26Z" fill="#2E7D45"/><path d="M24 40 Q20 24 36 26 Q50 22 64 26 Q80 24 76 40 Q80 70 66 84 Q58 90 50 84 Q42 90 34 84 Q20 70 24 40Z" fill="#3DA046"/><path d="M36 34 Q32 60 36 82 M64 34 Q68 60 64 82" stroke="#2C7A33" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="42" cy="40" rx="4" ry="8" fill="#fff" opacity=".35" stroke="none"/>` },
+  goya: { face: null, s: `<path d="M30 14 Q46 12 54 30 Q66 56 62 80 Q58 92 48 88 Q36 82 34 60 Q30 36 30 14Z" fill="#56A845"/><path d="M28 12 Q34 6 40 12" stroke-width="3" fill="none"/><g fill="#3B7F31" stroke="none"><ellipse cx="38" cy="26" rx="2" ry="3"/><ellipse cx="46" cy="32" rx="2" ry="3"/><ellipse cx="40" cy="40" rx="2" ry="3"/><ellipse cx="50" cy="46" rx="2" ry="3"/><ellipse cx="42" cy="54" rx="2" ry="3"/><ellipse cx="54" cy="60" rx="2" ry="3"/><ellipse cx="45" cy="68" rx="2" ry="3"/><ellipse cx="55" cy="74" rx="2" ry="3"/><ellipse cx="49" cy="81" rx="2" ry="3"/></g>` },
+  momo: { face: [62, 60], s: `<path d="M50 30 Q38 12 24 18 Q36 30 50 30Z" fill="#4CA04A"/><path d="M50 30 Q70 18 84 40 Q92 66 70 82 Q58 90 50 84 Q42 90 30 82 Q8 66 16 40 Q30 18 50 30Z" fill="#F9B8A8"/><path d="M50 30 Q70 18 84 40 Q92 66 70 82 Q58 90 50 84 Q44 56 50 30Z" fill="#F28C8C" opacity=".55" stroke="none"/><path d="M50 32 Q43 58 50 83" stroke="#E07878" stroke-width="2.5" fill="none" stroke-linecap="round"/>` },
+  kuri: { face: [50, 58], fc: '#fff', s: `<path d="M50 14 Q60 24 76 46 Q86 62 78 76 Q66 88 50 88 Q34 88 22 76 Q14 62 24 46 Q40 24 50 14Z" fill="#8A4F2A"/><path d="M22 75 Q50 92 78 75 Q72 88 50 89 Q28 88 22 75Z" fill="#D9B88A" stroke="none"/><ellipse cx="38" cy="44" rx="5" ry="10" fill="#fff" opacity=".25" stroke="none" transform="rotate(25 38 44)"/>` },
+  kaki: { face: [50, 64], s: `<rect x="47" y="21" width="6" height="11" rx="2" fill="#6B4A2E"/><ellipse cx="50" cy="59" rx="37" ry="30" fill="#F28A1E"/><ellipse cx="34" cy="56" rx="6" ry="9" fill="#fff" opacity=".3" stroke="none"/><path d="M50 34 L62 24 L64 36 L77 38 L64 44 L50 42 L36 44 L23 38 L36 36 L38 24Z" fill="#5E8C3A"/>` },
+  nashi: { face: [50, 60], s: `<path d="M50 25 Q50 15 56 10" stroke="#6B4A2E" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="50" cy="57" r="33" fill="#E6C474"/><g fill="#C9A24E" stroke="none"><circle cx="34" cy="44" r="1.3"/><circle cx="62" cy="40" r="1.3"/><circle cx="70" cy="58" r="1.3"/><circle cx="30" cy="66" r="1.3"/><circle cx="48" cy="78" r="1.3"/><circle cx="66" cy="74" r="1.3"/><circle cx="44" cy="36" r="1.3"/></g><ellipse cx="38" cy="46" rx="6" ry="8" fill="#fff" opacity=".3" stroke="none"/>` },
+  ginnan: { face: null, s: `<path d="M50 60 V74" stroke="#B88A2E" stroke-width="3" stroke-linecap="round"/><path d="M50 60 Q20 52 16 28 Q32 16 50 32 Q68 16 84 28 Q80 52 50 60Z" fill="#F2C94C"/><path d="M50 58 L36 30 M50 58 L50 36 M50 58 L64 30" stroke="#DDAE2E" stroke-width="1.8" fill="none"/><ellipse cx="33" cy="82" rx="10" ry="7.5" fill="#F5EBD0"/><ellipse cx="67" cy="82" rx="10" ry="7.5" fill="#B9D46A"/>` },
+  hakusai: { face: [50, 66], s: `<path d="M30 88 Q22 60 28 36 Q34 14 50 12 Q66 14 72 36 Q78 60 70 88Z" fill="#F4F6E6"/><path d="M38 46 Q40 66 38 86 M62 46 Q60 66 62 86" stroke="#DCE3C4" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M27 42 Q30 14 50 12 Q70 14 73 42 Q66 34 59 42 Q50 32 41 42 Q34 34 27 42Z" fill="#7CC160"/>` },
+  negi: { face: null, s: `<path d="M22 88 l-8 4 M24 90 l-6 8 M26 92 l-2 7" stroke="#C9C2A8" stroke-width="2" stroke-linecap="round"/><path d="M58 40 L80 10 L86 14 L66 46Z" fill="#3F8F3F"/><path d="M60 42 L90 24 L93 30 L66 46Z" fill="#4CA04A"/><path d="M20 86 L58 40 L66 46 L28 92Z" fill="#FAFAF2"/><path d="M50 50 L58 40 L66 46 L57 56Z" fill="#D5E8B5" stroke="none"/>` },
+  cabbage: { face: [50, 64], s: `<circle cx="50" cy="54" r="34" fill="#B5DC88"/><path d="M50 26 Q46 52 50 86 M50 54 Q40 48 32 40 M50 54 Q60 48 68 40" stroke="#E2F2CC" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M16 56 Q14 28 36 20 Q28 40 33 62 Q24 68 16 56Z M84 56 Q86 28 64 20 Q72 40 67 62 Q76 68 84 56Z" fill="#7DBF55"/>` },
+  shiitake: { face: [50, 40], fc: '#fff', s: `<path d="M44 52 H56 L58 88 Q50 92 42 88Z" fill="#F3EBDD"/><path d="M12 54 Q14 22 50 20 Q86 22 88 54 Q50 62 12 54Z" fill="#7A4E2D"/><path d="M28 34 l6 4 l-4 4 M66 30 l-4 6 l6 2 M70 46 l-6 -2" stroke="#E8D3B0" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+});
+Object.assign(ICONS, {
+  daizu: { face: null, s: `<g fill="#E9CF86"><ellipse cx="45" cy="44" rx="13" ry="11"/><ellipse cx="70" cy="46" rx="12" ry="10"/><ellipse cx="30" cy="60" rx="13" ry="11"/><ellipse cx="57" cy="63" rx="13" ry="11"/><ellipse cx="42" cy="78" rx="12" ry="10"/><ellipse cx="70" cy="76" rx="11" ry="9"/></g><path d="M41 42 h7 M66 44 h7 M26 58 h7 M53 61 h7 M38 76 h7 M66 74 h6" stroke="#B8954A" stroke-width="2.4" stroke-linecap="round" fill="none"/>` },
+  kome: { face: null, s: `<path d="M22 94 Q28 54 46 32 Q60 16 80 12" stroke="#9C8A3E" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#E9C45A">${[[40,44,-50],[49,33,-40],[59,24,-30],[70,17,-15],[33,56,-60],[56,40,15],[66,31,25],[44,52,15],[78,22,40],[29,68,-65]].map(([x,y,r])=>`<ellipse cx="${x}" cy="${y}" rx="6" ry="9" transform="rotate(${r} ${x} ${y})"/>`).join('')}</g>` },
+  komugi: { face: null, s: `<path d="M50 94 V30" stroke="#B08A3E" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M44 30 L38 8 M56 30 L62 8 M42 44 L32 26 M58 44 L68 26 M42 58 L32 40 M58 58 L68 40" stroke="#C9A24E" stroke-width="1.6" fill="none"/><g fill="#E8B84E">${[30,44,58].map(y=>`<ellipse cx="43" cy="${y}" rx="6" ry="8" transform="rotate(-20 43 ${y})"/><ellipse cx="57" cy="${y}" rx="6" ry="8" transform="rotate(20 57 ${y})"/>`).join('')}<ellipse cx="50" cy="22" rx="5" ry="8"/></g>` },
+  edamame: { face: null, s: `<path d="M10 58 Q14 44 28 44 Q34 34 44 40 Q52 32 62 40 Q72 34 80 42 Q92 46 90 56 Q86 64 76 62 Q68 70 58 64 Q50 72 40 66 Q32 72 24 66 Q12 68 10 58Z" fill="#8CC85A"/><path d="M16 58 Q50 54 86 54" stroke="#5E9A36" stroke-width="2" fill="none"/><g fill="#B5E08A" stroke="#5E9A36" stroke-width="1.6"><ellipse cx="30" cy="52" rx="7" ry="6"/><ellipse cx="50" cy="50" rx="7" ry="6"/><ellipse cx="70" cy="50" rx="7" ry="6"/></g><path d="M90 52 L97 48" stroke-width="3"/><g stroke="#5E9A36" stroke-width="1.2"><path d="M20 66 l-2 3 M44 70 l-1 3 M66 66 l1 3 M84 60 l2 3"/></g>` },
+  miso: { face: [50, 70], s: `<path d="M18 46 H82 L76 88 H24Z" fill="#C9A06A"/><path d="M20 58 H80 M23 76 H77" stroke="#8A6A3B" stroke-width="3" fill="none"/><ellipse cx="50" cy="46" rx="32" ry="9" fill="#9C6A35"/><path d="M27 46 Q50 26 73 46 Q50 52 27 46Z" fill="#B07A40"/>` },
+  shoyu: { face: null, s: `<rect x="40" y="10" width="20" height="13" rx="3" fill="#E8504A"/><path d="M40 22 H60 V34 Q72 40 72 54 V86 Q72 91 67 91 H33 Q28 91 28 86 V54 Q28 40 40 34Z" fill="#4A2C1E"/><rect x="34" y="56" width="32" height="22" rx="3" fill="#FFF6E3"/><path d="M42 67 h16" stroke="#E8504A" stroke-width="3" stroke-linecap="round"/><path d="M34 46 Q36 40 42 38" stroke="#fff" stroke-opacity=".4" stroke-width="3" fill="none" stroke-linecap="round"/>` },
+  kinako: { face: null, s: `<ellipse cx="50" cy="66" rx="40" ry="16" fill="#FFFFFF"/><path d="M20 64 Q50 26 80 64 Q50 72 20 64Z" fill="#E8C878"/><g fill="#C9A24E" stroke="none"><circle cx="40" cy="52" r="1.4"/><circle cx="52" cy="44" r="1.4"/><circle cx="60" cy="56" r="1.4"/><circle cx="46" cy="60" r="1.4"/><circle cx="66" cy="62" r="1.4"/></g>` },
+  tonyu: { face: [50, 47], s: `<rect x="44" y="9" width="12" height="8" rx="2" fill="#C9A86A"/><path d="M28 36 L36 16 H64 L72 36Z" fill="#FFFDF5"/><rect x="28" y="36" width="44" height="52" rx="3" fill="#FFFDF5"/><rect x="28" y="60" width="44" height="17" fill="#C9A86A"/><path d="M36 68 h28" stroke="#fff" stroke-width="3" stroke-linecap="round"/>` },
+  aburaage: { face: [50, 56], s: `<path d="M16 42 Q16 32 26 32 H74 Q84 32 84 42 V68 Q84 78 74 78 H26 Q16 78 16 68Z" fill="#E2A64A"/><g fill="#C98A30" stroke="none"><circle cx="28" cy="44" r="2"/><circle cx="70" cy="42" r="2"/><circle cx="74" cy="66" r="2"/><circle cx="30" cy="68" r="2"/><circle cx="46" cy="40" r="1.6"/><circle cx="58" cy="70" r="1.6"/></g>` },
+  koridofu: { face: null, s: `<path d="M18 40 L50 27 L82 40 L50 53Z" fill="#F3E6C2"/><path d="M18 40 L50 53 V82 L18 69Z" fill="#E8D6A6"/><path d="M82 40 L50 53 V82 L82 69Z" fill="#D9C48C"/><g fill="#C9B07A" stroke="none"><circle cx="30" cy="54" r="2"/><circle cx="40" cy="64" r="2.4"/><circle cx="28" cy="66" r="1.6"/><circle cx="62" cy="62" r="2"/><circle cx="72" cy="56" r="2.4"/><circle cx="68" cy="70" r="1.6"/><circle cx="46" cy="38" r="1.8"/><circle cx="58" cy="42" r="1.6"/></g>` },
+  okara: { face: null, s: `<ellipse cx="50" cy="68" rx="40" ry="15" fill="#DDE9F5"/><path d="M22 66 Q22 56 30 54 Q32 44 42 44 Q48 36 56 42 Q66 40 70 50 Q80 54 78 66 Q50 74 22 66Z" fill="#F6EFDC"/><g fill="#E2D6B6" stroke="none"><circle cx="36" cy="56" r="1.8"/><circle cx="48" cy="50" r="1.8"/><circle cx="60" cy="54" r="1.8"/><circle cx="54" cy="62" r="1.8"/><circle cx="68" cy="60" r="1.8"/><circle cx="42" cy="62" r="1.8"/></g>` },
+  namacream: { face: null, s: `<ellipse cx="50" cy="80" rx="36" ry="10" fill="#DDE9F5"/><path d="M20 78 Q18 66 30 64 Q26 52 40 50 Q38 38 50 36 Q46 24 54 14 Q58 26 62 36 Q74 38 70 50 Q82 52 76 64 Q86 66 80 78Z" fill="#FFFDF7"/><path d="M30 64 Q50 70 70 64 M40 50 Q50 54 62 50" stroke="#E8E0CF" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+  icecream: { face: [50, 42], s: `<path d="M34 52 L50 94 L66 52Z" fill="#E2AE62"/><path d="M40 60 L58 78 M46 56 L62 70 M60 60 L44 80 M54 56 L40 70" stroke="#B8823A" stroke-width="2" fill="none"/><path d="M28 50 Q26 24 50 22 Q74 24 72 50 Q68 56 62 52 Q58 60 52 54 Q46 60 40 54 Q32 58 28 50Z" fill="#FFF3E0"/>` },
+  senbei: { face: [50, 52], s: `<circle cx="50" cy="52" r="34" fill="#D9A65A"/><circle cx="50" cy="52" r="27" fill="none" stroke="#C08A42" stroke-width="2"/><g fill="#A8742E" stroke="none"><circle cx="34" cy="38" r="2.4"/><circle cx="66" cy="40" r="2"/><circle cx="70" cy="64" r="2.4"/><circle cx="32" cy="66" r="2"/><circle cx="50" cy="76" r="1.8"/></g>` },
+  dango: { face: null, s: `<path d="M50 96 V8" stroke="#C9A06A" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="24" r="14" fill="#F7B6C2"/><circle cx="50" cy="50" r="14" fill="#FFFDF7"/><circle cx="50" cy="76" r="14" fill="#A8D46A"/>` },
+  komekopan: { face: [50, 60], s: `<path d="M14 66 Q12 36 50 32 Q88 36 86 66 Q86 78 74 78 H26 Q14 78 14 66Z" fill="#F3DFB0"/><path d="M22 52 Q50 40 78 52" stroke="#E2C48A" stroke-width="2.4" fill="none"/><g fill="#FFFFFF" stroke="#C9B07A" stroke-width="1.4"><ellipse cx="42" cy="44" rx="2.4" ry="4" transform="rotate(-20 42 44)"/><ellipse cx="50" cy="42" rx="2.4" ry="4"/><ellipse cx="58" cy="44" rx="2.4" ry="4" transform="rotate(20 58 44)"/></g>` },
+  somen: { face: null, s: `<rect x="22" y="20" width="56" height="62" rx="6" fill="#FFFDF5"/><path d="M30 22 V80 M38 22 V80 M46 22 V80 M54 22 V80 M62 22 V80 M70 22 V80" stroke="#ECE4D2" stroke-width="2" fill="none"/><rect x="18" y="44" width="64" height="14" rx="3" fill="#F28CA0"/>` },
+  ramennomen: { face: null, s: `<ellipse cx="50" cy="60" rx="36" ry="24" fill="#F2CF6A"/><path d="M20 56 Q26 48 32 56 T44 56 T56 56 T68 56 T80 56 M18 66 Q24 58 30 66 T42 66 T54 66 T66 66 T78 66 M26 46 Q32 38 38 46 T50 46 T62 46 T74 46" stroke="#D9AE3E" stroke-width="2.6" fill="none" stroke-linecap="round"/>` },
+  gyozakawa: { face: null, s: `<ellipse cx="54" cy="70" rx="32" ry="12" fill="#EFE7D3"/><ellipse cx="50" cy="60" rx="32" ry="12" fill="#F7F1E3"/><ellipse cx="46" cy="50" rx="32" ry="12" fill="#FFFBF2"/><g fill="#EAE0C8" stroke="none"><circle cx="36" cy="48" r="1.4"/><circle cx="54" cy="52" r="1.4"/><circle cx="48" cy="46" r="1.2"/></g>` },
+  macaroni: { face: null, s: `<g fill="none" stroke-linecap="butt"><path d="M20 46 Q20 26 40 26" stroke="#4A3A2E" stroke-width="17"/><path d="M20 46 Q20 26 40 26" stroke="#F2C85A" stroke-width="11"/><path d="M58 34 Q78 34 78 54" stroke="#4A3A2E" stroke-width="17"/><path d="M58 34 Q78 34 78 54" stroke="#F2C85A" stroke-width="11"/><path d="M34 82 Q34 62 54 62" stroke="#4A3A2E" stroke-width="17"/><path d="M34 82 Q34 62 54 62" stroke="#F2C85A" stroke-width="11"/></g><g fill="#C99A2E" stroke="none"><ellipse cx="20" cy="47" rx="4" ry="2"/><ellipse cx="78" cy="55" rx="4" ry="2"/><ellipse cx="34" cy="83" rx="4" ry="2"/></g>` },
+  kamaboko: { face: [50, 52], s: `<rect x="16" y="62" width="68" height="13" rx="2" fill="#D9B07A"/><path d="M22 62 Q22 32 50 32 Q78 32 78 62Z" fill="#FFFFFF"/><path d="M22 62 Q22 32 50 32 Q78 32 78 62 L71 62 Q71 39 50 39 Q29 39 29 62Z" fill="#F28CA0" stroke="none"/>` },
+  chikuwa: { face: null, s: `<path d="M22 38 H76 Q90 38 90 55 Q90 72 76 72 H22Z" fill="#F2E3C4"/><g fill="#C98A4A" stroke="none"><path d="M30 40 Q38 46 34 54 Q28 50 30 40Z"/><path d="M48 39 Q58 44 54 56 Q46 50 48 39Z"/><path d="M66 40 Q76 48 70 58 Q62 50 66 40Z"/><path d="M38 70 Q44 62 52 70Z"/></g><ellipse cx="22" cy="55" rx="10" ry="17" fill="#F7EDD8"/><ellipse cx="22" cy="55" rx="4.5" ry="8" fill="#B8A07A"/>` },
+  nasu: { face: [46, 60], fc: '#fff', s: `<path d="M64 26 Q86 30 82 56 Q78 84 50 88 Q22 90 20 70 Q18 54 36 46 Q48 40 52 30Z" fill="#6B3A8C"/><path d="M52 30 Q58 18 72 22 Q76 30 70 34 Q62 36 52 30Z" fill="#3F7A3A"/><path d="M66 22 Q70 12 78 10" stroke="#3F7A3A" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="36" cy="64" rx="5" ry="9" fill="#fff" opacity=".22" stroke="none" transform="rotate(30 36 64)"/>` },
+  okura: { face: null, s: `<path d="M24 20 Q36 14 44 22 L82 82 Q84 88 78 86 L26 34 Q18 28 24 20Z" fill="#5DAA4A"/><path d="M36 26 L80 84 M30 30 L78 86" stroke="#3E7F32" stroke-width="2" fill="none"/><path d="M24 20 Q18 12 24 8 Q32 12 30 18Z" fill="#8FBF4A"/>` },
+  cauliflower: { face: [50, 50], s: `<path d="M14 62 Q10 40 28 36 Q30 58 40 70 Q24 74 14 62Z M86 62 Q90 40 72 36 Q70 58 60 70 Q76 74 86 62Z" fill="#6DAA45"/><path d="M30 80 Q50 92 70 80 L64 70 H36Z" fill="#8FC261"/><g fill="#FBF7EA"><circle cx="34" cy="50" r="12"/><circle cx="66" cy="50" r="12"/><circle cx="50" cy="40" r="14"/><circle cx="50" cy="60" r="13"/><circle cx="38" cy="64" r="10"/><circle cx="62" cy="64" r="10"/></g>` },
+  myoga: { face: null, s: `<path d="M50 12 Q70 30 70 58 Q70 84 50 88 Q30 84 30 58 Q30 30 50 12Z" fill="#E88AA0"/><path d="M50 14 Q40 40 42 86 M50 14 Q60 40 58 86 M36 50 Q50 40 64 50 M33 66 Q50 56 67 66" stroke="#C9607A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M34 78 Q50 92 66 78 Q66 86 50 89 Q34 86 34 78Z" fill="#F7E3D0" stroke="none"/>` },
+  lettuce: { face: [50, 60], s: `<path d="M12 56 Q10 40 22 36 Q20 26 32 24 Q36 14 50 16 Q64 14 68 24 Q80 26 78 36 Q90 40 88 56 Q90 74 76 80 Q66 90 50 88 Q34 90 24 80 Q10 74 12 56Z" fill="#9CD066"/><circle cx="50" cy="56" r="26" fill="#C9E89A"/><path d="M50 32 Q46 56 50 82 M50 56 Q38 50 30 44 M50 56 Q62 50 70 44" stroke="#E6F5CC" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+  horenso: { face: null, s: `<path d="M44 84 Q42 60 30 40 M50 84 Q50 56 50 30 M56 84 Q58 60 70 40" stroke="#6DAA45" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M30 42 Q14 34 18 18 Q34 16 36 34Z M50 32 Q40 18 50 6 Q60 18 50 32Z M70 42 Q86 34 82 18 Q66 16 64 34Z M38 60 Q22 58 20 46 Q34 44 40 56Z M62 60 Q78 58 80 46 Q66 44 60 56Z" fill="#2F8A3E"/><path d="M40 84 Q50 96 60 84 Q56 80 50 80 Q44 80 40 84Z" fill="#E8708A"/>` },
+  satoimo: { face: [50, 56], fc: '#fff', s: `<path d="M50 16 Q74 20 76 52 Q78 82 50 86 Q22 82 24 52 Q26 20 50 16Z" fill="#8A6A4A"/><path d="M30 40 Q50 34 70 40 M26 56 Q50 50 74 56 M28 72 Q50 66 72 72" stroke="#6B4E33" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M40 84 Q50 92 60 84 Q56 88 50 88 Q44 88 40 84Z" fill="#F3EBDD" stroke="none"/><path d="M48 16 L46 8 M52 16 L56 9" stroke="#6B4E33" stroke-width="2"/>` },
+  renkon: { face: null, s: `<path d="M44 24 H82 Q94 24 94 40 Q94 56 82 56 H44Z" fill="#E9DCC0"/><circle cx="40" cy="56" r="32" fill="#F6ECD6"/><circle cx="40" cy="56" r="26" fill="none" stroke="#E2D2AE" stroke-width="2"/><g fill="#C9B48A">${[[40,56,6],[40,38,5],[56,46,5],[56,66,5],[40,74,5],[24,66,5],[24,46,5]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g>` },
+});
+const bowlBase = (soup, inner) => `<path d="M38 84 H62 L60 91 H40Z" fill="#7A2E2A"/><path d="M10 46 H90 Q88 84 50 86 Q12 84 10 46Z" fill="#9C3A33"/><ellipse cx="50" cy="46" rx="40" ry="11" fill="${soup}"/>${inner}<path d="M20 58 Q50 66 80 58" stroke="#fff" stroke-opacity=".25" stroke-width="3" fill="none"/>`;
+const plateBase = inner => `<ellipse cx="50" cy="62" rx="44" ry="24" fill="#FFFFFF"/><ellipse cx="50" cy="62" rx="32" ry="16" fill="none" stroke="#EFEAE0" stroke-width="2"/>${inner}`;
+const smallBowl = (fill, inner) => `<path d="M40 84 H60 L58 90 H42Z" fill="#B8C6D6"/><path d="M14 52 H86 Q84 84 50 86 Q16 84 14 52Z" fill="#DDE9F5"/>${inner}`;
+Object.assign(ICONS, {
+  tamanegi: { face: [50, 62], s: `<path d="M50 20 Q49 10 53 5" stroke="#8A6A3B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M44 88 l-4 6 M50 88 v7 M56 88 l4 6" stroke="#C9B48A" stroke-width="2" stroke-linecap="round"/><path d="M50 20 Q56 30 70 40 Q86 56 78 74 Q68 88 50 88 Q32 88 22 74 Q14 56 30 40 Q44 30 50 20Z" fill="#E2A65A"/><path d="M50 24 Q38 50 43 86 M50 24 Q62 50 57 86" stroke="#B87A34" stroke-width="2" fill="none"/><ellipse cx="34" cy="56" rx="4" ry="9" fill="#fff" opacity=".3" stroke="none"/>` },
+  onigiri: { face: [50, 68], s: `<path d="M50 14 Q58 14 84 68 Q88 82 74 84 H26 Q12 82 16 68 Q42 14 50 14Z" fill="#FFFFFF"/><circle cx="50" cy="52" r="9" fill="#F58A5C"/><path d="M34 44 l4 -2 M60 40 l4 2 M30 66 l4 1 M66 64 l3 -2" stroke="#E2D9C8" stroke-width="2.4" stroke-linecap="round"/>` },
+  sandwich: { face: null, s: `<path d="M50 10 V40" stroke="#C9A06A" stroke-width="3"/><path d="M50 12 L64 16 L50 20Z" fill="#E8504A" stroke-width="2"/><rect x="12" y="66" width="76" height="14" rx="3" fill="#F3DFB0"/><rect x="14" y="60" width="72" height="7" fill="#F7D046"/><rect x="16" y="54" width="68" height="7" fill="#E8483F"/><path d="M12 54 Q18 46 24 54 T36 54 T48 54 T60 54 T72 54 T88 54 L84 48 H16Z" fill="#7CC160"/><rect x="12" y="30" width="76" height="18" rx="3" fill="#F3DFB0"/><rect x="17" y="34" width="66" height="10" rx="2" fill="#FFF8E8" stroke="none"/>` },
+  curry: { face: null, s: plateBase(`<path d="M12 60 Q14 42 44 40 Q50 52 46 80 Q18 80 12 60Z" fill="#FFFDF5"/><path d="M44 40 Q82 40 88 60 Q86 80 48 82 Q54 62 44 40Z" fill="#B8742E"/><g stroke-width="2"><rect x="58" y="50" width="9" height="9" rx="2" fill="#F0862E"/><rect x="70" y="60" width="10" height="9" rx="2" fill="#F2D27A"/><rect x="56" y="66" width="9" height="8" rx="2" fill="#F4A3A8"/></g>`) },
+  karaage: { face: null, s: plateBase(`<g fill="#D98A3A"><path d="M20 58 Q18 44 32 42 Q44 38 48 50 Q52 64 38 68 Q22 70 20 58Z"/><path d="M50 52 Q50 38 64 38 Q78 38 80 52 Q82 66 66 68 Q52 68 50 52Z"/><path d="M34 70 Q34 58 48 58 Q62 58 62 70 Q62 80 48 80 Q34 80 34 70Z"/></g><g fill="#B8692A" stroke="none"><circle cx="30" cy="52" r="1.6"/><circle cx="64" cy="48" r="1.6"/><circle cx="70" cy="58" r="1.6"/><circle cx="46" cy="68" r="1.6"/><circle cx="54" cy="74" r="1.6"/></g>`) },
+  tamagoyaki: { face: null, s: plateBase(`<g fill="#F7D046">${[22, 42, 62].map(x => `<rect x="${x}" y="42" width="18" height="30" rx="5"/>`).join('')}</g><g stroke="#E0B52E" stroke-width="2" fill="none" stroke-linecap="round">${[31, 51, 71].map(x => `<path d="M${x} 50 q-5 2 -4 7 q2 6 8 4 q5 -3 2 -9"/>`).join('')}</g>`) },
+  yasaiitame: { face: null, s: plateBase(`<g stroke-width="2"><path d="M20 60 Q28 48 40 54 Q34 66 20 60Z" fill="#D9EFB8"/><path d="M48 50 Q62 44 70 54 Q58 60 48 50Z" fill="#D9EFB8"/><path d="M56 66 Q68 62 78 68 Q66 74 56 66Z" fill="#D9EFB8"/><rect x="36" y="58" width="18" height="5" rx="2" fill="#F0862E" transform="rotate(-20 45 60)"/><rect x="60" y="54" width="16" height="5" rx="2" fill="#F0862E" transform="rotate(25 68 56)"/><path d="M28 68 Q36 64 44 70 Q36 74 28 68Z" fill="#F4A3A8"/><path d="M42 46 Q50 42 56 46 Q50 50 42 46Z" fill="#F4A3A8"/></g>`) },
+  ohitashi: { face: null, s: smallBowl('#DDE9F5', `<path d="M24 54 Q28 36 50 34 Q72 36 76 54Z" fill="#2F8A3E"/><path d="M34 50 Q40 40 50 44 M50 44 Q60 40 66 50" stroke="#5DB55F" stroke-width="2" fill="none"/>`) },
+  potatosalad: { face: null, s: smallBowl('#DDE9F5', `<path d="M20 54 Q22 30 50 30 Q78 30 80 54Z" fill="#F6E7A8"/><g stroke-width="1.6"><circle cx="38" cy="42" r="5" fill="#B8DE8A"/><circle cx="60" cy="40" r="5" fill="#B8DE8A"/><rect x="48" y="46" width="6" height="6" rx="1" fill="#F0862E"/><rect x="30" y="48" width="5" height="5" rx="1" fill="#F0862E"/></g>`) },
+  salad: { face: null, s: smallBowl('#DDE9F5', `<path d="M16 54 Q16 40 28 38 Q30 26 44 28 Q52 20 62 28 Q76 26 76 38 Q86 42 84 54Z" fill="#9CD066"/><g stroke-width="1.8"><path d="M34 44 L48 40 L44 52Z" fill="#E8483F"/><path d="M58 38 L70 44 L60 50Z" fill="#E8483F"/><circle cx="50" cy="34" r="5" fill="#D9EFB8"/><circle cx="40" cy="36" r="4" fill="#D9EFB8"/></g>`) },
+  mabo: { face: null, s: smallBowl('#DDE9F5', `<ellipse cx="50" cy="52" rx="34" ry="9" fill="#B8432E"/><path d="M18 52 Q20 38 50 36 Q80 38 82 52Z" fill="#C8553A"/><g fill="#FFFDF5" stroke-width="1.6"><rect x="28" y="40" width="9" height="8" rx="1.5"/><rect x="44" y="36" width="9" height="8" rx="1.5"/><rect x="60" y="40" width="9" height="8" rx="1.5"/><rect x="50" y="46" width="8" height="6" rx="1.5"/></g><g fill="#5DB55F" stroke="none"><circle cx="40" cy="47" r="1.8"/><circle cx="66" cy="49" r="1.8"/><circle cx="56" cy="40" r="1.6"/></g>`) },
+  misoshiru: { face: null, s: bowlBase('#C9945A', `<g fill="#FFFDF5" stroke-width="1.6"><rect x="34" y="40" width="8" height="7" rx="1.5"/><rect x="56" y="42" width="8" height="7" rx="1.5"/></g><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="48" cy="47" r="2.6"/><circle cx="66" cy="49" r="2.4"/><circle cx="28" cy="46" r="2.4"/></g>`) },
+  tonjiru: { face: null, s: bowlBase('#C9945A', `<g stroke-width="1.6"><path d="M28 44 Q34 40 40 44 Q34 48 28 44Z" fill="#F4A3A8"/><rect x="46" y="38" width="8" height="6" rx="1.5" fill="#F0862E"/><rect x="58" y="44" width="9" height="6" rx="1.5" fill="#FAFAF4"/><circle cx="44" cy="48" r="3.5" fill="#E9DFC8"/></g><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="68" cy="40" r="2.4"/></g>`) },
+  tamagosoup: { face: null, s: bowlBase('#F3E2A0', `<path d="M24 46 Q32 40 40 46 T56 46 T72 44" stroke="#F7C93F" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="46" cy="40" r="2.4"/><circle cx="62" cy="49" r="2.4"/></g>`) },
+  yasaisoup: { face: null, s: bowlBase('#F1E3BE', `<g stroke-width="1.6"><rect x="30" y="42" width="8" height="6" rx="1.5" fill="#F0862E"/><path d="M44 40 Q52 36 58 42 Q50 46 44 40Z" fill="#D9EFB8"/><path d="M60 46 Q66 42 72 46 Q66 50 60 46Z" fill="#F2E3BE"/><rect x="48" y="46" width="7" height="5" rx="1.5" fill="#F0862E"/></g>`) },
+});
+Object.assign(ICONS, {
+  zoni: { face: null, s: bowlBase('#F3EAD6', `<rect x="36" y="38" width="18" height="12" rx="4" fill="#FFFFFF"/><path d="M58 42 Q64 38 70 42 Q64 46 58 42Z" fill="#5DB55F"/><rect x="26" y="42" width="8" height="5" rx="1.5" fill="#F28CA0"/><circle cx="62" cy="49" r="3" fill="#F0862E"/>`) },
+  nanakusagayu: { face: null, s: bowlBase('#FFFBF0', `<g fill="#5DB55F" stroke-width="1.4"><path d="M30 44 Q34 38 40 42 Q36 48 30 44Z"/><path d="M48 40 Q54 34 60 40 Q54 44 48 40Z"/><path d="M60 47 Q66 42 72 46 Q66 50 60 47Z"/><path d="M40 48 Q44 44 50 47 Q45 51 40 48Z"/></g><circle cx="56" cy="47" r="2.6" fill="#FAFAF4" stroke-width="1.4"/>`) },
+  fukumame: { face: null, s: `<path d="M18 46 L82 46 L76 86 L24 86Z" fill="#E2C48A"/><path d="M18 46 L24 86 M82 46 L76 86" stroke-width="3"/><path d="M14 40 H86 V48 H14Z" fill="#D4B072"/><g fill="#E9CF86">${[[32,40],[44,36],[56,38],[68,40],[38,44],[62,44],[50,42]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="6.5" ry="5.5"/>`).join('')}</g>` },
+  hinaarare: { face: null, s: `<ellipse cx="50" cy="70" rx="40" ry="14" fill="#FFFFFF"/>${[[30, 62, '#F7B6C2'], [42, 56, '#FFFDF5'], [54, 58, '#A8D46A'], [66, 62, '#F7D046'], [38, 66, '#A8D46A'], [50, 64, '#F7B6C2'], [62, 68, '#FFFDF5'], [46, 50, '#F7D046'], [58, 50, '#F7B6C2'], [72, 70, '#A8D46A'], [28, 70, '#FFFDF5']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="5.5" fill="${c}" stroke-width="1.8"/>`).join('')}` },
+  kashiwamochi: { face: null, s: `<path d="M14 66 Q16 30 50 26 Q84 30 86 66 Q50 80 14 66Z" fill="#6E9A4A"/><path d="M50 28 Q46 50 50 76 M50 40 Q38 38 28 44 M50 40 Q62 38 72 44 M50 56 Q36 54 22 60 M50 56 Q64 54 78 60" stroke="#4E7A34" stroke-width="2" fill="none"/><path d="M24 70 Q26 48 50 46 Q74 48 76 70 Q50 80 24 70Z" fill="#FFFDF5"/>` },
+  tsukimidango: { face: null, s: `<path d="M20 84 H80 L74 92 H26Z" fill="#D9B07A"/><path d="M24 80 H76 V86 H24Z" fill="#C9A06A"/><g fill="#FFFDF7">${[[32, 72], [50, 72], [68, 72], [41, 58], [59, 58], [50, 44]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9.5"/>`).join('')}</g>` },
+  chitoseame: { face: null, s: `<path d="M30 30 L56 14 L84 86 L58 96Z" fill="#F7E3D0"/><path d="M34 34 L50 24 L60 50 L44 60Z" fill="#E8504A" stroke="none"/><g stroke-width="3"><path d="M36 92 L44 20" stroke="#4A3A2E" stroke-width="10" stroke-linecap="round"/><path d="M36 92 L44 20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/></g><path d="M40 40 l-2 4 M42 60 l-2 4 M38 78 l-2 4" stroke="#E8504A" stroke-width="3" stroke-linecap="round"/>` },
+  toshikoshisoba: { face: null, s: bowlBase('#8A5A34', `<path d="M20 46 Q26 41 32 46 T44 46 T56 46 T68 46 T80 46 M26 50 Q32 45 38 50 T50 50 T62 50 T74 50" stroke="#B89A7A" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="40" cy="42" r="2.4"/><circle cx="60" cy="43" r="2.4"/></g>`) },
+});
+const fishShape = (body, back, extra = '') => `<path d="M82 50 L96 38 L92 50 L96 62Z" fill="${back}"/><path d="M10 52 Q26 32 56 33 Q76 35 84 50 Q76 65 56 67 Q26 70 10 52Z" fill="${body}"/><path d="M15 46 Q30 34 56 34.5 Q74 36 82 46 Q56 42 15 46Z" fill="${back}" stroke="none"/>${extra}<path d="M30 42 Q34 50 31 58" stroke="${back}" stroke-width="2.2" fill="none"/><circle cx="20" cy="50" r="3.4" fill="#24324A" stroke="none"/><circle cx="21" cy="49" r="1" fill="#fff" stroke="none"/>`;
+const donburi = top => `<path d="M38 84 H62 L60 91 H40Z" fill="#2F4A6E"/><path d="M10 50 H90 Q88 84 50 86 Q12 84 10 50Z" fill="#3E6194"/><path d="M14 50 Q16 30 50 28 Q84 30 86 50Z" fill="#FFFFFF"/>${top}<path d="M20 62 Q50 70 80 62" stroke="#fff" stroke-opacity=".35" stroke-width="3" fill="none"/>`;
+const leafBunch = (leaf, stem, extra = '') => `<path d="M44 92 Q42 64 32 44 M50 92 Q50 60 50 34 M56 92 Q58 64 68 44" stroke="${stem}" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M32 46 Q14 40 16 22 Q34 18 38 36Z M50 36 Q38 20 50 6 Q62 20 50 36Z M68 46 Q86 40 84 22 Q66 18 62 36Z" fill="${leaf}"/>${extra}`;
+Object.assign(ICONS, {
+  // どこを食べてる？
+  tomorokoshi: { face: null, s: `<path d="M30 30 Q22 60 40 92 Q30 60 34 30Z M70 30 Q78 60 60 92 Q70 60 66 30Z" fill="#7CBF4A"/><path d="M50 10 Q66 14 66 40 Q66 76 50 90 Q34 76 34 40 Q34 14 50 10Z" fill="#F7D046"/><g fill="#E8B830" stroke="none">${[22, 32, 42, 52, 62, 72].map(y => `<circle cx="44" cy="${y}" r="2.4"/><circle cx="50" cy="${y + 3}" r="2.4"/><circle cx="56" cy="${y}" r="2.4"/>`).join('')}</g><path d="M50 10 Q48 4 44 2 M50 10 Q54 4 58 3" stroke="#B88A4A" stroke-width="2" fill="none"/>` },
+  greenpeas: { face: null, s: `<path d="M12 60 Q20 36 50 34 Q80 34 90 50 Q84 70 50 70 Q22 72 12 60Z" fill="#6DB34A"/><path d="M20 56 Q28 42 50 42 Q72 42 82 52 Q74 62 50 62 Q28 64 20 56Z" fill="#F2F7E6" stroke="none"/>${[30, 42, 54, 66, 76].map(x => `<circle cx="${x}" cy="52" r="5.5" fill="#8CCB55"/>`).join('')}` },
+  ingen: { face: null, s: `<g fill="#6DAA45">${[[-14, 0], [0, 4], [14, -2]].map(([dx, dy]) => `<path d="M${30 + dx} ${18 + dy} Q${44 + dx} ${50 + dy} ${36 + dx} ${88 + dy} Q${42 + dx} ${90 + dy} ${44 + dx} ${86 + dy} Q${50 + dx} ${50 + dy} ${36 + dx} ${16 + dy}Z" transform="translate(16 0)"/>`).join('')}</g>` },
+  komatsuna: { face: null, s: leafBunch('#3F9A3F', '#7CBF4A') },
+  chingensai: { face: null, s: `<path d="M30 90 Q22 60 30 40 Q36 24 50 22 Q64 24 70 40 Q78 60 70 90Z" fill="#D9EFB8"/><path d="M28 50 Q16 30 30 16 Q42 22 40 44Z M72 50 Q84 30 70 16 Q58 22 60 44Z M50 36 Q38 18 50 6 Q62 18 50 36Z" fill="#3F9A3F"/><path d="M40 52 Q42 72 40 88 M60 52 Q58 72 60 88" stroke="#B8DE8A" stroke-width="2.4" fill="none"/>` },
+  paseri: { face: null, s: `<path d="M50 92 V50 M50 70 Q40 60 32 52 M50 64 Q60 56 68 48" stroke="#4C9A3E" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="#3F8F3F">${[[50, 34, 16], [30, 44, 12], [70, 40, 12], [40, 24, 10], [62, 24, 10], [50, 50, 9]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g><g fill="#5DB55F" stroke="none"><circle cx="46" cy="30" r="3"/><circle cx="66" cy="38" r="2.6"/><circle cx="28" cy="42" r="2.6"/></g>` },
+  aojiso: { face: null, s: `<path d="M50 12 Q80 24 82 52 Q80 80 50 90 Q20 80 18 52 Q20 24 50 12Z" fill="#4CAF50"/><path d="M50 14 V90 M50 34 L32 26 M50 34 L68 26 M50 50 L26 42 M50 50 L74 42 M50 66 L30 60 M50 66 L70 60" stroke="#2E7D32" stroke-width="2" fill="none"/><path d="M50 90 V98" stroke="#2E7D32" stroke-width="3"/>` },
+  gobou: { face: null, s: `<path d="M64 10 L72 14 L34 92 L28 90Z" fill="#8A6A4A"/><path d="M60 22 l6 3 M54 36 l6 3 M48 50 l6 3 M42 64 l6 3 M36 78 l5 2" stroke="#5E4530" stroke-width="2"/><path d="M64 10 Q60 0 54 2 M68 12 Q74 2 80 4" stroke="#6DAA45" stroke-width="3" fill="none" stroke-linecap="round"/>` },
+  shoga: { face: null, s: `<path d="M18 62 Q16 48 30 46 Q34 34 46 38 Q52 26 64 32 Q78 30 80 44 Q92 50 86 62 Q84 76 68 74 Q60 84 48 78 Q34 84 28 74 Q16 74 18 62Z" fill="#E8C47A"/><path d="M30 56 q6 -2 8 2 M54 48 q6 -2 8 2 M62 64 q6 -2 8 2 M40 68 q5 -2 7 2" stroke="#B8924A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M64 32 Q66 20 72 16" stroke="#E88AA0" stroke-width="4" fill="none" stroke-linecap="round"/>` },
+  celery: { face: null, s: `<path d="M36 92 Q32 60 40 30 M50 94 Q50 60 50 26 M64 92 Q68 60 60 30" stroke="#A8D46A" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M36 92 Q32 60 40 30 M50 94 Q50 60 50 26 M64 92 Q68 60 60 30" stroke="#C9E89A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 30 Q28 16 34 8 Q42 14 44 26Z M50 26 Q46 10 54 4 Q58 14 54 26Z M60 30 Q68 14 76 16 Q72 26 64 32Z" fill="#5DB55F"/>` },
+  shokuyogiku: { face: null, s: `<g fill="#F7D046">${Array.from({ length: 16 }, (_, i) => `<ellipse cx="50" cy="26" rx="5" ry="16" transform="rotate(${i * 22.5} 50 52)"/>`).join('')}</g><g fill="#F2B700" stroke="none">${Array.from({ length: 10 }, (_, i) => `<ellipse cx="50" cy="38" rx="3.5" ry="10" transform="rotate(${i * 36 + 18} 50 52)"/>`).join('')}</g><circle cx="50" cy="52" r="8" fill="#E8A530"/>` },
+  // もと
+  ganmodoki: { face: [50, 56], s: `<path d="M18 56 Q18 32 50 30 Q82 32 82 56 Q82 78 50 80 Q18 78 18 56Z" fill="#C98A3E"/><g stroke-width="1.6"><rect x="34" y="46" width="6" height="4" rx="1" fill="#F0862E"/><rect x="58" y="60" width="6" height="4" rx="1" fill="#F0862E"/><circle cx="62" cy="44" r="2.4" fill="#5DB55F"/><circle cx="38" cy="64" r="2.4" fill="#5DB55F"/></g>` },
+  bifun: { face: null, s: `<ellipse cx="50" cy="66" rx="40" ry="16" fill="#FFFFFF"/><path d="M20 62 Q24 50 30 60 Q36 46 42 58 Q48 44 54 58 Q60 46 66 60 Q72 50 80 62" stroke="#F3EEE2" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M20 62 Q24 50 30 60 Q36 46 42 58 Q48 44 54 58 Q60 46 66 60 Q72 50 80 62" stroke="#DDD4C0" stroke-width="1.4" fill="none"/><path d="M26 66 Q40 56 50 66 Q60 56 74 66" stroke="#DDD4C0" stroke-width="1.4" fill="none"/>` },
+  pizzakiji: { face: null, s: `<circle cx="50" cy="54" r="38" fill="#F3D9A0"/><circle cx="50" cy="54" r="30" fill="#FBEACB" stroke="none"/><g fill="#E2C48A" stroke="none"><circle cx="38" cy="44" r="2"/><circle cx="62" cy="48" r="2"/><circle cx="48" cy="66" r="2"/><circle cx="66" cy="66" r="1.6"/></g>` },
+  chukaman: { face: [50, 62], s: `<path d="M14 72 Q12 38 50 30 Q88 38 86 72 Q86 80 76 80 H24 Q14 80 14 72Z" fill="#FFFDF7"/><path d="M50 30 Q46 40 40 44 M50 30 Q50 40 50 46 M50 30 Q54 40 60 44" stroke="#E2D9C8" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+  tenpuranokoromo: { face: null, s: `<path d="M38 84 H62 L60 90 H40Z" fill="#B8C6D6"/><path d="M12 48 H88 Q86 84 50 86 Q14 84 12 48Z" fill="#DDE9F5"/><ellipse cx="50" cy="48" rx="38" ry="10" fill="#F6ECCE"/><path d="M58 14 L66 46" stroke="#9C8A6A" stroke-width="4" stroke-linecap="round"/><path d="M60 46 Q66 36 74 44 Q68 52 60 46Z" fill="#9C8A6A" stroke-width="2"/>` },
+  biscuit: { face: [50, 52], s: `<rect x="16" y="20" width="68" height="64" rx="10" fill="#E8B866"/><g fill="#C98A3E" stroke="none">${[[32, 36], [50, 36], [68, 36], [32, 68], [50, 68], [68, 68]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4"/>`).join('')}</g>` },
+  katsuobushi: { face: null, s: `<path d="M14 48 Q30 30 70 32 Q90 38 88 50 Q86 62 70 66 Q30 70 14 48Z" fill="#8A5A34"/><path d="M24 48 Q50 42 80 48" stroke="#6B4528" stroke-width="2" fill="none"/><g fill="#F0C9A0">${[[30, 80, -20], [46, 84, 10], [62, 80, -10], [74, 86, 25]].map(([x, y, r]) => `<path d="M${x - 8} ${y} Q${x} ${y - 8} ${x + 8} ${y} Q${x} ${y + 4} ${x - 8} ${y}Z" transform="rotate(${r} ${x} ${y})"/>`).join('')}</g>` },
+  satsumaage: { face: [50, 58], s: `<ellipse cx="50" cy="58" rx="36" ry="24" fill="#D9963E"/><ellipse cx="50" cy="56" rx="28" ry="17" fill="#E2A64A" stroke="none"/><g fill="#B8742E" stroke="none"><circle cx="34" cy="50" r="1.8"/><circle cx="66" cy="54" r="1.8"/><circle cx="56" cy="68" r="1.6"/></g>` },
+  hanpen: { face: [38, 62], s: `<path d="M14 34 Q14 28 20 28 L64 28 Q70 28 66 34 L22 82 Q16 86 14 80Z" fill="#FAFCFF"/><path d="M86 36 Q86 30 80 32 L40 80 Q36 86 42 86 L80 86 Q86 86 86 80Z" fill="#FAFCFF"/><g fill="#E6ECF2" stroke="none"><circle cx="26" cy="40" r="1.6"/><circle cx="40" cy="38" r="1.6"/><circle cx="30" cy="52" r="1.6"/><circle cx="70" cy="70" r="1.6"/><circle cx="76" cy="56" r="1.6"/><circle cx="62" cy="78" r="1.6"/></g>` },
+  niboshi: { face: null, s: `${[[0, 0], [6, 22], [-4, 42]].map(([dx, dy]) => `<g transform="translate(${dx} ${dy})"><path d="M80 30 L92 24 L90 30 L92 36Z" fill="#8A97A6"/><path d="M14 30 Q30 22 60 24 Q76 26 82 30 Q76 34 60 36 Q30 38 14 30Z" fill="#B8C3CE"/><circle cx="20" cy="29" r="2" fill="#24324A" stroke="none"/></g>`).join('')}` },
+  shirasu: { face: null, s: `<ellipse cx="50" cy="66" rx="40" ry="16" fill="#DDE9F5"/><g stroke="#FFFDF7" stroke-width="3.4" fill="none" stroke-linecap="round">${[[30, 60, 10], [44, 54, -15], [58, 58, 20], [70, 62, -5], [38, 68, -20], [54, 68, 5], [66, 70, 15], [48, 62, 30]].map(([x, y, r]) => `<path d="M${x - 7} ${y} q7 -3 14 0" transform="rotate(${r} ${x} ${y})"/>`).join('')}</g><g fill="#24324A" stroke="none">${[[23, 60], [37, 56], [51, 58], [63, 62], [31, 69], [47, 68], [59, 70], [41, 60]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1"/>`).join('')}</g>` },
+  gyuniku: { face: [50, 52], s: `<path d="M14 56 Q12 34 40 30 Q70 26 84 42 Q92 60 74 72 Q50 84 28 76 Q14 70 14 56Z" fill="#C8434E"/><path d="M28 44 Q40 52 36 64 M52 38 Q60 48 54 60 M66 46 Q70 54 66 66" stroke="#F3C6CA" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+  saba: { face: null, s: fishShape('#C9D4DE', '#3E7A8C', '<path d="M24 40 q4 -4 8 0 q4 -4 8 0 q4 -4 8 0 q4 -4 8 0 q4 -4 8 0" stroke="#24324A" stroke-width="1.6" fill="none"/>') },
+  iwashi: { face: null, s: fishShape('#D3DCE6', '#4A6E96', '<g fill="#24324A" stroke="none"><circle cx="40" cy="52" r="1.6"/><circle cx="48" cy="52" r="1.6"/><circle cx="56" cy="52" r="1.6"/><circle cx="64" cy="51" r="1.6"/></g>') },
+  // 料理
+  oyakodon: { face: null, s: donburi(`<path d="M18 46 Q24 32 50 30 Q76 32 82 46 Q50 54 18 46Z" fill="#F7D046"/><g stroke-width="1.6"><path d="M30 42 Q36 38 42 42 Q36 46 30 42Z" fill="#E9B27A"/><path d="M56 38 Q62 34 68 38 Q62 42 56 38Z" fill="#E9B27A"/><circle cx="48" cy="40" r="2.4" fill="#5DB55F"/></g>`) },
+  gyudon: { face: null, s: donburi(`<path d="M18 46 Q24 32 50 30 Q76 32 82 46 Q50 54 18 46Z" fill="#8A4A3A"/><path d="M28 40 Q40 34 52 40 M50 36 Q62 32 72 38" stroke="#F2E3BE" stroke-width="3" fill="none" stroke-linecap="round"/>`) },
+  omurice: { face: null, s: `<ellipse cx="50" cy="66" rx="44" ry="22" fill="#FFFFFF"/><path d="M14 64 Q16 36 50 34 Q84 36 86 64 Q50 72 14 64Z" fill="#F7D046"/><path d="M34 46 Q42 40 50 48 Q58 40 66 46" stroke="#E8483F" stroke-width="5" fill="none" stroke-linecap="round"/>` },
+  chahan: { face: null, s: plateBase(`<path d="M18 62 Q20 40 50 38 Q80 40 82 62Z" fill="#F3DFA0"/><g stroke-width="1.4"><circle cx="34" cy="52" r="2.6" fill="#F7D046"/><circle cx="52" cy="46" r="2.6" fill="#F7D046"/><circle cx="64" cy="54" r="2.4" fill="#5DB55F"/><circle cx="42" cy="56" r="2.4" fill="#5DB55F"/><rect x="56" y="44" width="5" height="4" rx="1" fill="#F4A3A8"/></g>`) },
+  yakisoba: { face: null, s: plateBase(`<path d="M18 60 Q24 42 50 40 Q76 42 82 60Z" fill="#B8742E"/><path d="M22 56 Q28 48 34 56 T46 56 T58 56 T70 56 T80 56" stroke="#8A5424" stroke-width="2.4" fill="none"/><g stroke-width="1.4"><path d="M36 48 Q42 44 48 48 Q42 52 36 48Z" fill="#D9EFB8"/><rect x="56" y="46" width="10" height="3.5" rx="1.5" fill="#F0862E"/><path d="M60 54 Q66 50 72 54 Q66 58 60 54Z" fill="#F4A3A8"/></g>`) },
+  ramen: { face: null, s: bowlBase('#E8C686', `<path d="M22 47 Q28 42 34 47 T46 47 T58 47 T70 47 T80 47" stroke="#F2CF6A" stroke-width="3" fill="none"/><g stroke-width="1.6"><circle cx="34" cy="42" r="6" fill="#FFFFFF"/><circle cx="34" cy="42" r="3" fill="#F7C93F" stroke="none"/><path d="M52 38 Q60 34 68 40 Q60 44 52 38Z" fill="#F4A3A8"/></g><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="48" cy="46" r="2.4"/><circle cx="70" cy="47" r="2.4"/></g>`) },
+  gyoza: { face: null, s: plateBase(`${[[28, 56], [50, 52], [72, 56]].map(([x, y]) => `<path d="M${x - 14} ${y + 6} Q${x} ${y - 16} ${x + 14} ${y + 6}Z" fill="#F7EBD0"/><path d="M${x - 8} ${y - 2} l3 -4 M${x - 2} ${y - 5} l2 -4 M${x + 4} ${y - 5} l2 -4" stroke="#E2D2AE" stroke-width="1.8"/><path d="M${x - 14} ${y + 6} H${x + 14}" stroke="#C98A3E" stroke-width="3"/>`).join('')}`) },
+  hamburg: { face: null, s: plateBase(`<ellipse cx="50" cy="58" rx="28" ry="15" fill="#7A4A30"/><path d="M30 54 Q50 44 70 54 Q60 60 50 58 Q40 60 30 54Z" fill="#9C4A2E" stroke="none"/>`) },
+  stew: { face: null, s: smallBowl('#DDE9F5', `<ellipse cx="50" cy="52" rx="35" ry="9" fill="#FFF8EC"/><g stroke-width="1.6"><rect x="30" y="46" width="8" height="7" rx="1.5" fill="#F0862E"/><rect x="46" y="44" width="9" height="8" rx="1.5" fill="#F2D27A"/><path d="M60 48 Q66 44 72 48 Q66 52 60 48Z" fill="#E9B27A"/></g>`) },
+  gratin: { face: null, s: `<ellipse cx="50" cy="66" rx="42" ry="20" fill="#F7F7F2"/><ellipse cx="50" cy="60" rx="36" ry="16" fill="#F2D27A"/><g fill="#D9963E" stroke="none"><ellipse cx="38" cy="56" rx="7" ry="4"/><ellipse cx="60" cy="60" rx="8" ry="4"/><ellipse cx="48" cy="66" rx="6" ry="3"/></g>` },
+  nikujaga: { face: null, s: smallBowl('#DDE9F5', `<path d="M18 52 Q20 38 50 36 Q80 38 82 52Z" fill="#C9945A"/><g stroke-width="1.6"><path d="M28 46 Q32 38 42 40 Q46 48 36 50Z" fill="#F2D27A"/><path d="M56 42 Q62 36 70 42 Q66 50 58 48Z" fill="#F2D27A"/><rect x="44" y="40" width="9" height="6" rx="1.5" fill="#F0862E"/><path d="M38 48 Q46 44 54 48 Q46 52 38 48Z" fill="#C8434E"/></g>`) },
+  kinpira: { face: null, s: smallBowl('#DDE9F5', `<path d="M22 52 Q26 38 50 36 Q74 38 78 52Z" fill="#9C6A3A"/><path d="M30 46 L44 40 M40 48 L56 42 M52 48 L68 42 M34 40 L46 46" stroke="#6B4528" stroke-width="2.6" stroke-linecap="round"/><path d="M46 44 L60 38 M36 44 L48 48" stroke="#F0862E" stroke-width="2.6" stroke-linecap="round"/>`) },
+  nattogohan: { face: null, s: donburi(`<path d="M30 40 Q50 28 70 40 Q50 46 30 40Z" fill="#9A6634"/><g fill="#C48A48"><circle cx="40" cy="38" r="3"/><circle cx="50" cy="35" r="3"/><circle cx="60" cy="38" r="3"/><circle cx="48" cy="41" r="3"/></g><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="56" cy="42" r="2.2"/></g>`) },
+  tempura: { face: null, s: plateBase(`<path d="M26 66 Q22 44 40 38 Q52 34 54 46 Q56 62 40 68 Q30 70 26 66Z" fill="#F2D27A"/><path d="M54 46 L62 34 L66 40 L60 48Z" fill="#E8604A"/><path d="M58 66 Q60 50 74 50 Q86 52 82 64 Q76 72 64 70 Q58 70 58 66Z" fill="#F2D27A"/><g fill="#E8C47A" stroke="none"><circle cx="34" cy="50" r="2"/><circle cx="44" cy="58" r="2"/><circle cx="70" cy="58" r="2"/></g>`) },
+  sabamiso: { face: null, s: plateBase(`<path d="M18 62 Q24 44 54 44 Q78 46 84 60 Q78 72 54 72 Q24 74 18 62Z" fill="#B8742E"/><path d="M26 62 Q50 56 76 60" stroke="#C9D4DE" stroke-width="3" fill="none"/><path d="M60 50 h8 M64 46 v8" stroke="#E8C47A" stroke-width="2"/>`) },
+  kenchinjiru: { face: null, s: bowlBase('#F1E3BE', `<g stroke-width="1.6"><rect x="30" y="40" width="8" height="7" rx="1.5" fill="#FFFDF5"/><rect x="46" y="38" width="8" height="5" rx="1.5" fill="#F0862E"/><rect x="58" y="44" width="9" height="5" rx="1.5" fill="#FAFAF4"/><circle cx="42" cy="48" r="3.2" fill="#E9DFC8"/><path d="M62 38 L70 36" stroke="#6B4528" stroke-width="2.6"/></g>`) },
+  oden: { face: null, s: smallBowl('#DDE9F5', `<ellipse cx="50" cy="52" rx="35" ry="9" fill="#E8D49A"/><g stroke-width="1.6"><ellipse cx="34" cy="44" rx="10" ry="7" fill="#FAFAF4"/><ellipse cx="54" cy="42" rx="8" ry="10" fill="#FFFFFF"/><ellipse cx="54" cy="44" rx="4" ry="4" fill="#F7C93F" stroke="none"/><rect x="62" y="40" width="16" height="9" rx="4" fill="#F2E3C4"/></g>`) },
+  shogayaki: { face: null, s: plateBase(`<g stroke-width="2"><path d="M18 58 Q22 44 44 46 Q50 56 40 66 Q24 68 18 58Z" fill="#B8742E"/><path d="M42 52 Q48 40 68 42 Q80 50 74 62 Q58 68 46 62Z" fill="#9C5A2E"/></g><path d="M30 52 Q36 56 34 62 M56 48 Q62 52 60 58" stroke="#E8C47A" stroke-width="2" fill="none"/>`) },
+  // 行事
+  osechi: { face: null, s: `<rect x="14" y="18" width="72" height="72" rx="6" fill="#2A2A2A"/><rect x="18" y="22" width="64" height="64" rx="3" fill="#B8432E"/><path d="M50 22 V86 M18 54 H82" stroke="#2A2A2A" stroke-width="3"/><g stroke-width="1.6"><ellipse cx="34" cy="38" rx="9" ry="7" fill="#F7D046"/><path d="M58 32 Q66 28 74 32 L74 44 Q66 48 58 44Z" fill="#FFFFFF"/><circle cx="30" cy="66" r="4" fill="#3A2A2A"/><circle cx="38" cy="72" r="4" fill="#3A2A2A"/><circle cx="34" cy="62" r="4" fill="#3A2A2A"/><path d="M58 64 Q66 58 74 64 Q66 76 58 64Z" fill="#E8604A"/></g>` },
+  chimaki: { face: null, s: `<path d="M50 10 L74 86 Q50 94 26 86Z" fill="#6E9A4A"/><path d="M50 10 L44 88 M50 10 L60 88" stroke="#4E7A34" stroke-width="2" fill="none"/><path d="M30 60 Q50 54 70 60 M34 74 Q50 68 66 74" stroke="#D9C48C" stroke-width="3" fill="none"/>` },
+});
+Object.assign(ICONS, {
+  shungiku: { face: null, s: leafBunch('#2F8A3E', '#5DAA45', `<g fill="#2F8A3E">${[[26, 30], [74, 30], [40, 18], [60, 18]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6"/>`).join('')}</g>`) },
+  mizuna: { face: null, s: `<path d="M50 94 Q40 60 22 20 M50 94 Q46 56 38 10 M50 94 Q54 56 62 10 M50 94 Q60 60 78 20" stroke="#E8F2D8" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#4CAF50">${[[22, 20], [38, 10], [62, 10], [78, 20], [30, 40], [70, 40], [42, 30], [58, 30]].map(([x, y]) => `<path d="M${x} ${y - 7} l4 4 l-2 1 l5 4 l-3 1 l3 5 l-7 -2 l-7 2 l3 -5 l-3 -1 l5 -4 l-2 -1Z"/>`).join('')}</g>` },
+  nira: { face: null, s: `<g stroke="#3F9A3F" stroke-width="5" fill="none" stroke-linecap="round">${[30, 38, 46, 54, 62, 70].map((x, i) => `<path d="M${50 + (x - 50) * .3} 92 Q${x} 50 ${x + (i % 2 ? 6 : -6)} 10"/>`).join('')}</g><rect x="38" y="70" width="24" height="7" rx="2" fill="#4A90D9"/>` },
+  sayaendo: { face: null, s: `<path d="M14 58 Q24 34 52 32 Q80 32 88 46 Q80 66 52 66 Q24 70 14 58Z" fill="#7CC160"/><path d="M20 56 Q50 48 84 48" stroke="#5E9A36" stroke-width="2" fill="none"/><g fill="#9CD66E" stroke="none">${[32, 46, 60, 72].map(x => `<ellipse cx="${x}" cy="54" rx="4" ry="3"/>`).join('')}</g><path d="M88 46 Q94 40 92 34" stroke-width="3" fill="none"/>` },
+  melon: { face: [50, 58], s: `<circle cx="50" cy="56" r="34" fill="#A8D46A"/><g stroke="#E8F5D0" stroke-width="2" fill="none"><path d="M24 40 Q40 50 34 70 M40 26 Q54 44 44 86 M62 24 Q60 50 72 80 M76 38 Q64 54 82 64 M28 62 Q50 58 76 70 M22 50 Q50 40 80 46"/></g><path d="M50 22 Q50 12 56 8 M44 14 Q50 10 58 14" stroke="#6B8E23" stroke-width="3.5" fill="none" stroke-linecap="round"/>` },
+  sukiyaki: { face: null, s: `<path d="M8 50 H92" stroke="#2A2A2A" stroke-width="6" stroke-linecap="round"/><path d="M14 50 H86 Q84 78 50 80 Q16 78 14 50Z" fill="#3A3A3A"/><ellipse cx="50" cy="50" rx="36" ry="9" fill="#8A4A3A"/><g stroke-width="1.6"><rect x="26" y="42" width="10" height="8" rx="1.5" fill="#FFFDF5"/><path d="M42 44 Q52 38 62 44 Q52 50 42 44Z" fill="#C8434E"/><rect x="64" y="42" width="12" height="5" rx="2" fill="#FAFAF4"/><circle cx="56" cy="50" r="3" fill="#7A4E2D"/></g>` },
+  yakitori: { face: null, s: `<path d="M14 86 L86 14" stroke="#C9A06A" stroke-width="4" stroke-linecap="round"/>${[[30, 70, '#C98A4A'], [44, 56, '#FAFAF2'], [58, 42, '#C98A4A'], [72, 28, '#FAFAF2']].map(([x, y, c], i) => i % 2 ? `<rect x="${x - 9}" y="${y - 6}" width="18" height="12" rx="3" fill="${c}" transform="rotate(-45 ${x} ${y})"/><rect x="${x - 9}" y="${y - 2}" width="18" height="4" fill="#5DB55F" stroke="none" transform="rotate(-45 ${x} ${y})"/>` : `<circle cx="${x}" cy="${y}" r="10" fill="${c}"/>`).join('')}` },
+  sanmayaki: { face: null, s: `<rect x="6" y="40" width="88" height="34" rx="6" fill="#FFFFFF"/>` + `<g transform="translate(0 6)"><path d="M86 50 L95 43 L93 50 L95 57Z" fill="#5E6E7E"/><path d="M12 52 Q30 40 70 45 Q82 47 87 50 Q82 55 70 57 Q30 62 12 52Z" fill="#8A97A6"/><path d="M30 48 l6 6 M46 47 l6 7 M62 47 l6 7" stroke="#4A3A2E" stroke-width="2"/><circle cx="21" cy="50" r="2.6" fill="#24324A" stroke="none"/></g>` },
+  buriteri: { face: null, s: plateBase(`<path d="M22 60 Q24 44 52 42 Q78 42 80 58 Q76 72 50 72 Q26 72 22 60Z" fill="#9C5A2E"/><path d="M30 58 Q50 50 72 56" stroke="#C9D4DE" stroke-width="3" fill="none"/><ellipse cx="44" cy="50" rx="8" ry="2.5" fill="#fff" opacity=".35" stroke="none"/>`) },
+  kabochanimono: { face: null, s: smallBowl('#DDE9F5', `<g stroke-width="2"><path d="M22 52 Q24 36 40 38 L40 52Z" fill="#3F6B3A"/><path d="M24 52 Q26 40 38 41 L38 52Z" fill="#F2B700" stroke="none"/><path d="M42 52 Q46 30 62 34 L62 52Z" fill="#3F6B3A"/><path d="M44 52 Q48 34 60 37 L60 52Z" fill="#F2B700" stroke="none"/><path d="M62 52 Q66 38 78 42 L78 52Z" fill="#3F6B3A"/><path d="M64 52 Q67 41 76 44 L76 52Z" fill="#F2B700" stroke="none"/></g>`) },
+  chawanmushi: { face: null, s: `<path d="M24 34 H76 L72 86 H28Z" fill="#E9E2D0"/><ellipse cx="50" cy="34" rx="26" ry="7" fill="#F7E3A0"/><g stroke-width="1.4"><path d="M38 32 Q44 28 50 32 Q44 36 38 32Z" fill="#F07A4F"/><circle cx="58" cy="33" r="3" fill="#7A4E2D"/><path d="M60 30 l6 -3" stroke="#5DB55F" stroke-width="2.4"/></g><path d="M22 30 Q50 18 78 30" stroke-width="3" fill="none"/>` },
+  curryudon: { face: null, s: bowlBase('#C08A3E', `<path d="M22 47 Q28 42 34 47 T46 47 T58 47 T70 47 T80 47" stroke="#F3E2B0" stroke-width="3.2" fill="none"/><g stroke-width="1.6"><path d="M34 42 Q40 38 46 42 Q40 46 34 42Z" fill="#F4A3A8"/></g><g fill="none" stroke="#5DB55F" stroke-width="2"><circle cx="58" cy="42" r="2.4"/><circle cx="66" cy="48" r="2.4"/></g>`) },
+  minestrone: { face: null, s: bowlBase('#E2643E', `<g stroke-width="1.6"><rect x="30" y="42" width="7" height="6" rx="1.5" fill="#F0862E"/><path d="M42 40 Q50 36 56 42 Q48 46 42 40Z" fill="#D9EFB8"/><rect x="58" y="44" width="7" height="5" rx="1.5" fill="#F2E3BE"/><rect x="48" y="46" width="6" height="5" rx="1.5" fill="#E8483F"/></g>`) },
+});
+Object.assign(ICONS, {
+  daikonnimono: { face: null, s: smallBowl('#DDE9F5', `<ellipse cx="50" cy="52" rx="34" ry="8" fill="#E8C686"/><g fill="#F3E6C8" stroke-width="1.8"><ellipse cx="36" cy="44" rx="11" ry="6"/><ellipse cx="60" cy="42" rx="11" ry="6"/><ellipse cx="48" cy="50" rx="11" ry="5"/></g>`) },
+  brosalad: { face: null, s: smallBowl('#DDE9F5', `<g fill="#3E8E41">${[[34, 44], [50, 38], [66, 44], [42, 50], [58, 50]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="8"/>`).join('')}</g><g fill="#9CCB6B" stroke-width="1.6"><rect x="38" y="48" width="5" height="6"/><rect x="56" y="48" width="5" height="6"/></g>`) },
+  kyuritsuke: { face: null, s: `<rect x="12" y="50" width="76" height="28" rx="6" fill="#FFFFFF"/>${[[28, 60], [42, 56], [56, 60], [70, 56], [36, 68], [60, 68]].map(([x, y]) => `<g><circle cx="${x}" cy="${y}" r="7" fill="#4C9A3E"/><circle cx="${x}" cy="${y}" r="5" fill="#D9EFB8" stroke="none"/></g>`).join('')}` },
+});
+const STROKE = '#4A3A2E';
+function faceSvg(ic) {
+  if (!ic.face) return '';
+  const [x, y] = ic.face, c = ic.fc || STROKE;
+  return `<g stroke="none"><ellipse cx="${x - 13}" cy="${y + 5}" rx="4" ry="2.5" fill="#FF8FA3" opacity=".7"/><ellipse cx="${x + 13}" cy="${y + 5}" rx="4" ry="2.5" fill="#FF8FA3" opacity=".7"/><circle cx="${x - 7}" cy="${y}" r="2.6" fill="${c}"/><circle cx="${x + 7}" cy="${y}" r="2.6" fill="${c}"/></g><path d="M${x - 4.5} ${y + 5} Q${x} ${y + 9.5} ${x + 4.5} ${y + 5}" stroke="${c}" stroke-width="2.3" fill="none" stroke-linecap="round"/>`;
+}
+function placeholder(f) {
+  const n = plain(f.n).replace(/（.*）/, ''), fs = n.length <= 3 ? 22 : n.length <= 5 ? 16 : 12;
+  return `<circle cx="50" cy="52" r="38" fill="#fff" stroke="#E2D8C3" stroke-width="3"/><circle cx="50" cy="52" r="29" fill="none" stroke="#EFE8DA" stroke-width="2"/><text x="50" y="${57 + (fs - 16) / 3}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="#7A6A55" font-family="'M PLUS Rounded 1c',sans-serif">${esc(n)}</text>`;
+}
+Object.assign(ICONS, {
+  // しゅん（ふやした分）
+  budou: { face: [50, 62], s: `<path d="M50 22 Q50 12 56 8" stroke="#7A5A33" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M54 18 Q70 8 82 18 Q70 26 54 18Z" fill="#5DA84A"/>${[[38,30],[50,30],[62,30],[32,42],[44,42],[56,42],[68,42],[38,54],[50,54],[62,54],[44,66],[56,66],[50,78]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="7.5" fill="#7B4FA6"/>`).join('')}<circle cx="36" cy="40" r="2.2" fill="#fff" opacity=".5" stroke="none"/>` },
+  sakuranbo: { face: null, s: `<path d="M50 12 Q40 30 32 58 M50 12 Q60 34 70 62" stroke="#5E8A2E" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M50 12 Q64 4 74 12 Q62 20 50 12Z" fill="#5DA84A"/><circle cx="31" cy="68" r="15" fill="#E0323F"/><circle cx="70" cy="72" r="15" fill="#E0323F"/><circle cx="25" cy="63" r="4" fill="#fff" opacity=".45" stroke="none"/><circle cx="64" cy="67" r="4" fill="#fff" opacity=".45" stroke="none"/>` },
+  tara: { face: null, s: fishShape('#D9D2C3', '#9C8E76', `<path d="M24 60 Q22 68 18 70" stroke="#9C8E76" stroke-width="2.4" fill="none" stroke-linecap="round"/><g fill="#9C8E76" stroke="none"><circle cx="46" cy="44" r="2"/><circle cx="58" cy="46" r="2"/><circle cx="68" cy="44" r="1.8"/><circle cx="52" cy="40" r="1.6"/></g>`) },
+  yuzu: { face: [50, 60], s: `<circle cx="50" cy="58" r="30" fill="#F7CF2E"/><g fill="#E0B414" stroke="none"><circle cx="38" cy="50" r="1.8"/><circle cx="60" cy="46" r="1.8"/><circle cx="66" cy="66" r="1.8"/><circle cx="42" cy="72" r="1.8"/><circle cx="52" cy="40" r="1.6"/><circle cx="30" cy="62" r="1.6"/></g><path d="M50 28 Q60 12 76 16 Q66 30 50 28Z" fill="#3DA35A"/><circle cx="50" cy="28" r="3.5" fill="#7A9B2E"/>` },
+  hamaguri: { face: [50, 60], s: `<path d="M50 22 Q78 24 90 58 Q74 82 50 82 Q26 82 10 58 Q22 24 50 22Z" fill="#E9DCC6"/><path d="M50 22 Q78 24 90 58 Q74 82 50 82Z" fill="#D9C6A6" stroke="none"/><path d="M28 44 Q50 36 72 44 M22 56 Q50 48 78 56 M24 68 Q50 62 76 68" stroke="#A88E6A" stroke-width="2" fill="none"/><path d="M44 24 Q50 18 56 24" stroke="#8E7656" stroke-width="2.4" fill="none"/>` },
+  matsutake: { face: [50, 60], fc: '#fff', s: `<path d="M40 40 Q36 70 38 90 H62 Q64 70 60 40Z" fill="#F1E6D2"/><path d="M42 52 l6 -2 M52 62 l6 -2 M42 72 l6 -2 M52 82 l6 -2" stroke="#C9B38E" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M24 44 Q26 16 50 14 Q74 16 76 44 Q50 50 24 44Z" fill="#8A5A34"/><path d="M34 28 l4 2 M58 22 l4 3 M64 36 l4 1" stroke="#C9A47A" stroke-width="2" fill="none" stroke-linecap="round"/>` },
+  fukinoto: { face: [50, 64], s: `<path d="M50 20 Q74 34 74 62 Q72 86 50 88 Q28 86 26 62 Q26 34 50 20Z" fill="#B9DB7A"/><path d="M50 22 Q34 40 34 64 Q34 82 50 88 M50 22 Q66 40 66 64 Q66 82 50 88" stroke="#6E9E36" stroke-width="2" fill="none"/><path d="M26 62 Q12 58 10 40 Q26 40 34 54Z M74 62 Q88 58 90 40 Q74 40 66 54Z" fill="#7DB843"/><g fill="#F3E58A" stroke="none"><circle cx="46" cy="38" r="2.4"/><circle cx="54" cy="40" r="2.4"/><circle cx="50" cy="32" r="2.2"/></g>` },
+  kani: { face: [50, 56], s: `<g fill="none" stroke="#D2432F" stroke-width="4.5" stroke-linecap="round"><path d="M26 60 L10 66 L6 80 M28 66 L16 78 L14 90 M74 60 L90 66 L94 80 M72 66 L84 78 L86 90"/><path d="M30 46 L20 34 M70 46 L80 34"/></g><path d="M12 22 Q16 12 26 16 L22 26 L30 30 Q20 38 12 22Z M88 22 Q84 12 74 16 L78 26 L70 30 Q80 38 88 22Z" fill="#E85A3F"/><ellipse cx="50" cy="58" rx="28" ry="20" fill="#E85A3F"/><path d="M30 52 Q50 46 70 52" stroke="#F7B8A6" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="42" cy="38" r="3.2" fill="#2A2A2A"/><circle cx="58" cy="38" r="3.2" fill="#2A2A2A"/><path d="M42 41 V48 M58 41 V48" stroke="#E85A3F" stroke-width="2.4"/>` },
+  wakasagi: { face: null, s: `<g transform="translate(0 -12) scale(1 .8) translate(0 12)">${fishShape('#DDE6EE', '#9FB1C2', `<path d="M18 54 Q50 58 84 51" stroke="#B9A3D6" stroke-width="3" fill="none" stroke-linecap="round"/>`)}</g><g transform="translate(4 30) scale(.8 .64)">${fishShape('#DDE6EE', '#9FB1C2', `<path d="M18 54 Q50 58 84 51" stroke="#B9A3D6" stroke-width="3" fill="none" stroke-linecap="round"/>`)}</g>` },
+  ayu: { face: null, s: fishShape('#C9D3B8', '#7E8E62', `<ellipse cx="40" cy="48" rx="5" ry="3" fill="#F2D25A" stroke="none"/><path d="M58 34 Q64 26 70 36" fill="#7E8E62"/>`) },
+  yomogi: { face: null, s: `<path d="M50 92 Q50 64 50 30" stroke="#5E8A3A" stroke-width="4" fill="none" stroke-linecap="round"/><g transform="translate(50 72) rotate(-60)"><path d="M0 0 Q-9 -6 -8 -16 L-4 -14 Q-6 -22 0 -30 Q6 -22 4 -14 L8 -16 Q9 -6 0 0Z" fill="#7FAF5A"/><path d="M0 -2 V-24" stroke="#E6F0DC" stroke-width="1.6" fill="none"/></g><g transform="translate(50 72) rotate(60)"><path d="M0 0 Q-9 -6 -8 -16 L-4 -14 Q-6 -22 0 -30 Q6 -22 4 -14 L8 -16 Q9 -6 0 0Z" fill="#7FAF5A"/><path d="M0 -2 V-24" stroke="#E6F0DC" stroke-width="1.6" fill="none"/></g><g transform="translate(50 54) rotate(-50)"><path d="M0 0 Q-9 -6 -8 -16 L-4 -14 Q-6 -22 0 -30 Q6 -22 4 -14 L8 -16 Q9 -6 0 0Z" fill="#7FAF5A"/><path d="M0 -2 V-24" stroke="#E6F0DC" stroke-width="1.6" fill="none"/></g><g transform="translate(50 54) rotate(50)"><path d="M0 0 Q-9 -6 -8 -16 L-4 -14 Q-6 -22 0 -30 Q6 -22 4 -14 L8 -16 Q9 -6 0 0Z" fill="#7FAF5A"/><path d="M0 -2 V-24" stroke="#E6F0DC" stroke-width="1.6" fill="none"/></g><g transform="translate(50 34) rotate(0)"><path d="M0 0 Q-9 -6 -8 -16 L-4 -14 Q-6 -22 0 -30 Q6 -22 4 -14 L8 -16 Q9 -6 0 0Z" fill="#7FAF5A"/><path d="M0 -2 V-24" stroke="#E6F0DC" stroke-width="1.6" fill="none"/></g>` },
+});
+Object.assign(ICONS, {
+  // こんだてに足した料理
+  moyashi: { face: [50, 58], s: `<g fill="none" stroke-linecap="round"><path d="M30 86 Q24 60 36 30" stroke="#F4F1E4" stroke-width="5"/><path d="M48 90 Q46 60 52 26" stroke="#F4F1E4" stroke-width="5"/><path d="M66 86 Q74 58 64 32" stroke="#F4F1E4" stroke-width="5"/><path d="M30 86 Q24 60 36 30 M48 90 Q46 60 52 26 M66 86 Q74 58 64 32" stroke="#DCD6BE" stroke-width="1.4"/></g><g fill="#E9E2A4"><ellipse cx="37" cy="26" rx="6" ry="5"/><ellipse cx="53" cy="22" rx="6" ry="5"/><ellipse cx="63" cy="28" rx="6" ry="5"/></g><g fill="#B7D96E" stroke="none"><path d="M37 22 q4 -6 8 -3 q-4 4 -8 3Z"/><path d="M53 18 q4 -6 8 -3 q-4 4 -8 3Z"/><path d="M63 24 q4 -6 8 -3 q-4 4 -8 3Z"/></g>` },
+  omelet: { face: null, s: plateBase(`<path d="M22 60 Q24 40 50 38 Q78 38 80 58 Q78 70 50 72 Q24 72 22 60Z" fill="#F7D046"/><path d="M28 58 Q50 50 74 56" stroke="#E0B52E" stroke-width="2" fill="none"/><path d="M44 46 Q52 42 60 46 Q58 52 52 52 Q46 52 44 46Z" fill="#E8504A"/>`) },
+  muniel: { face: null, s: plateBase(`<path d="M20 60 Q22 46 44 44 L74 46 Q84 52 82 62 Q74 70 46 70 Q22 70 20 60Z" fill="#F1A77E"/><path d="M24 56 Q50 50 78 54" stroke="#D27A50" stroke-width="2" fill="none"/><path d="M30 64 l4 -6 M44 66 l4 -8 M58 66 l4 -8" stroke="#C9683F" stroke-width="2" stroke-linecap="round"/><circle cx="76" cy="44" r="9" fill="#F7E36A"/><path d="M76 36 V52 M68 44 H84 M70 38 L82 50 M82 38 L70 50" stroke="#E7CB2E" stroke-width="1.4"/>`) },
+  tonkatsu: { face: null, s: plateBase(`<g stroke="none" fill="#C9E3A0"><path d="M14 58 Q18 44 30 46 Q30 60 22 68 Q14 66 14 58Z"/></g><path d="M17 60 l8 -8 M19 66 l9 -10" stroke="#8CBF5A" stroke-width="1.6"/><path d="M32 46 L43 46 L41 70 L30 70Z" fill="#D9963E"/><path d="M33 48 L41 48 L40 52 L32 52Z" fill="#F4E3C0" stroke="none"/><path d="M44 46 L55 46 L53 70 L42 70Z" fill="#D9963E"/><path d="M45 48 L53 48 L52 52 L44 52Z" fill="#F4E3C0" stroke="none"/><path d="M56 46 L67 46 L65 70 L54 70Z" fill="#D9963E"/><path d="M57 48 L65 48 L64 52 L56 52Z" fill="#F4E3C0" stroke="none"/><path d="M68 46 L79 46 L77 70 L66 70Z" fill="#D9963E"/><path d="M69 48 L77 48 L76 52 L68 52Z" fill="#F4E3C0" stroke="none"/><g fill="#F2C26E" stroke="none"><circle cx="37" cy="60" r="1.6"/><circle cx="48" cy="64" r="1.6"/><circle cx="60" cy="58" r="1.6"/><circle cx="71" cy="63" r="1.6"/><circle cx="41" cy="55" r="1.6"/><circle cx="64" cy="66" r="1.6"/></g>`) },
+  subuta: { face: null, s: smallBowl('#DDE9F5', `<path d="M18 52 Q20 36 50 34 Q80 36 82 52Z" fill="#C8553A"/><g stroke-width="1.6"><rect x="28" y="38" width="12" height="10" rx="3" fill="#A0522D"/><rect x="50" y="35" width="12" height="10" rx="3" fill="#A0522D"/><path d="M42 44 l8 -2 l2 6 l-8 2Z" fill="#4FA64A"/><path d="M64 42 l8 1 l-1 6 l-8 -1Z" fill="#F0862E"/><path d="M34 46 Q40 42 46 46" stroke="#F2E3BE" stroke-width="2" fill="none"/></g>`) },
+  horenchuka: { face: null, s: plateBase(`<path d="M24 60 Q26 44 50 42 Q74 44 76 60 Q60 68 50 66 Q38 68 24 60Z" fill="#2F8A3E"/><path d="M30 56 Q40 46 50 52 M50 52 Q60 46 70 56 M40 60 Q50 54 60 60" stroke="#5DB55F" stroke-width="2" fill="none"/><g fill="#F2E3BE" stroke="none"><circle cx="40" cy="52" r="1.8"/><circle cx="58" cy="50" r="1.8"/><circle cx="50" cy="58" r="1.6"/></g>`) },
+  moyashinira: { face: null, s: plateBase(`<path d="M22 60 Q26 46 50 44 Q74 46 78 60 Q62 68 50 66 Q36 68 22 60Z" fill="#F4F0DD"/><g fill="none" stroke-linecap="round"><path d="M30 56 Q40 50 50 54 M44 60 Q54 52 66 56 M36 50 Q46 46 56 48 M52 62 Q60 58 70 60" stroke="#DCD6BE" stroke-width="2.4"/><path d="M28 60 Q38 54 48 58 M54 50 Q64 46 72 52 M40 64 Q50 60 58 64" stroke="#3E8E41" stroke-width="3"/></g>`) },
+  croquette: { face: null, s: plateBase(`<path d="M34 50 Q38 36 50 36 Q62 36 66 50Z" fill="#C9E3A0"/><path d="M42 46 l6 -6 M52 46 l6 -6" stroke="#8CBF5A" stroke-width="1.6"/>${[[36, 56], [64, 56]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="15" ry="11" fill="#D9963E"/><g fill="#F2C26E" stroke="none"><circle cx="${x - 6}" cy="${y - 3}" r="1.8"/><circle cx="${x + 4}" cy="${y - 5}" r="1.8"/><circle cx="${x + 6}" cy="${y + 3}" r="1.8"/><circle cx="${x - 2}" cy="${y + 4}" r="1.6"/></g>`).join('')}`) },
+  satoimonimono: { face: null, s: smallBowl('#DDE9F5', `<path d="M20 54 Q24 42 50 40 Q76 42 80 54Z" fill="#C9A46A"/>${[[34, 44], [50, 40], [66, 44], [42, 50], [58, 50]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="8" ry="6" fill="#F4EEDD"/>`).join('')}<path d="M44 38 l4 -6 l4 6" stroke="#4FA64A" stroke-width="2.4" fill="none" stroke-linecap="round"/>`) },
+});
+function foodSvg(id, style = 'a', cls = 'fi') {
+  const f = F[id], ic = ICONS[id] || (f && f.icon && ICONS[f.icon]);
+  if (!ic) return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true">${placeholder(f)}</svg>`;
+  const st = style === 'b' ? 'stroke="none"' : `stroke="${STROKE}" stroke-width="3"`;
+  return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><g ${st} stroke-linejoin="round" stroke-linecap="round">${ic.s}</g>${style === 'c' ? faceSvg(ic) : ''}</svg>`;
+}
+const seasonIcon = s => {
+  const c = SEASONS[s].hex;
+  if (s === 'haru') return `<svg class="si" viewBox="0 0 40 40"><g fill="${c}">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="20" cy="10" rx="6" ry="8" transform="rotate(${a} 20 20)"/>`).join('')}</g><circle cx="20" cy="20" r="4" fill="#FFE07A"/></svg>`;
+  if (s === 'natsu') return `<svg class="si" viewBox="0 0 40 40"><circle cx="20" cy="20" r="8" fill="${c}"/><g stroke="${c}" stroke-width="3" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="20" y1="4" x2="20" y2="8" transform="rotate(${a} 20 20)"/>`).join('')}</g></svg>`;
+  if (s === 'aki') return `<svg class="si" viewBox="0 0 40 40"><path d="M20 4 L24 14 L34 11 L29 20 L36 26 L25 26 L22 36 L18 36 L15 26 L4 26 L11 20 L6 11 L16 14Z" fill="${c}"/><path d="M20 22 V38" stroke="${c}" stroke-width="2.4"/></svg>`;
+  return `<svg class="si" viewBox="0 0 40 40"><g stroke="${c}" stroke-width="3" stroke-linecap="round">${[0, 60, 120].map(a => `<line x1="20" y1="5" x2="20" y2="35" transform="rotate(${a} 20 20)"/>`).join('')}</g><circle cx="20" cy="20" r="3.5" fill="${c}"/></svg>`;
+};
+
+/* ---------- screens ---------- */
+let curScreen = 'title';
+function show(id) {
+  curScreen = id;
+  $$('.screen').forEach(s => s.classList.toggle('on', s.id === 'scr-' + id));
+  window.scrollTo(0, 0);
+  if (id === 'title') renderTitle();
+  if (id === 'weak') renderWeak();
+  if (id !== 'quiz') stopTimers();
+}
+$('#btn-home').onclick = () => { beep('tap'); show('title'); };
+function syncToggles() { $('#tg-furi').setAttribute('aria-pressed', store.d.furi); $('#tg-sound').setAttribute('aria-pressed', store.d.sound); }
+$('#tg-furi').onclick = () => {
+  store.d.furi = !store.d.furi; store.save(); syncToggles(); applyStatic(); renderTitle();
+  if (curScreen === 'quiz' && Q && Q.cur) renderQuestion(false);
+  if (curScreen === 'zukan') renderZukan();
+  if (curScreen === 'weak') renderWeak();
+  if (curScreen === 'result') renderResultList();
+  if (curScreen === 'course') renderCourses();
+};
+$('#tg-sound').onclick = () => { store.d.sound = !store.d.sound; store.save(); syncToggles(); beep('tap'); };
+syncToggles();
+
+/* title */
+function renderTitle() {
+  const w = weakItems().length, c = $('#weak-cnt'); c.textContent = w; c.classList.toggle('hidden', !w);
+  const nG = FOODS.filter(f => f.g).length, nS = FOODS.filter(f => f.s).length;
+  const all = [...FOODS, ...DISHES, ...EVENTS], gotN = all.filter(f => store.d.got[f.id]).length;
+  $('#stat').innerHTML = R(`{試作|しさく}：たべもの ${FOODS.length}・{料理|りょうり} ${DISHES.length}・{行事|ぎょうじ} ${EVENTS.length}　ずかん ${gotN} / ${all.length}`);
+  $('#hero-sub').innerHTML = R('3{色|しょく}のなかまと、{旬|しゅん}の{季節|きせつ}をおぼえよう');
+}
+(function hero() {
+  const svg = $('#hero-svg');
+  const plate = (cx, g, id, d) => `<g class="bob ${d}"><ellipse cx="${cx}" cy="128" rx="50" ry="14" fill="rgba(36,50,74,.08)"/><circle cx="${cx}" cy="78" r="48" fill="#fff" stroke="${GROUPS[g].hex}" stroke-width="9"/><circle cx="${cx}" cy="78" r="32" fill="none" stroke="#F1ECE1" stroke-width="2"/><g transform="translate(${cx - 34} 44) scale(.68)">${foodSvg(id).replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g></g>`;
+  svg.innerHTML = plate(62, 'r', 'tamago', '') + plate(170, 'y', 'gohan', 'd1') + plate(278, 'g', 'tomato', 'd2');
+  $('#ic-play').innerHTML = foodSvg('ringo', 'a', '');
+  $('#ic-zukan').innerHTML = foodSvg('broccoli', 'a', '');
+  $('#ic-weak').innerHTML = foodSvg('jagaimo', 'a', '');
+  $$('.btn .ic svg').forEach(s => { s.style.width = '30px'; s.style.height = '30px'; });
+})();
+$('#btn-play').onclick = () => { beep('tap'); show('course'); renderCourses(); };
+$('#btn-zukan').onclick = () => { beep('tap'); show('zukan'); renderZukan(); };
+$('#btn-weak').onclick = () => { beep('tap'); show('weak'); };
+$('#btn-sample').onclick = () => { beep('tap'); show('sample'); renderSample(); };
+
+/* courses */
+const NQ = 10, TA_SEC = 60, Q_SEC = 8;
+const COURSES = [
+  { key: 'g10', mode: 'g', ta: false, t: 'なかま{分|わ}け', d: 'たべものを {赤|あか}・{黄|き}・{緑|みどり} のお{皿|さら}に{分|わ}けよう。', stripe: 'linear-gradient(var(--red),var(--yel),var(--grn))' },
+  { key: 'm10', mode: 'm', ta: false, t: 'もとはなに？', d: 'とうふ・バター・パン…。なにからできているかな？', stripe: 'linear-gradient(#E9CF86,#4A90D9,#E8B84E)' },
+  { key: 'p10', mode: 'p', ta: false, t: 'どこを{食|た}べてる？', d: '{根|ね}・{茎|くき}・{葉|は}・つぼみ・{実|み}。やさいのどこを{食|た}べているかな？', stripe: 'linear-gradient(#E86A9A,#E8483F,#3DAA5C,#4C9A3E,#F0862E)' },
+  { key: 'd10', mode: 'd', ta: false, t: 'りょうりのなかま{分|わ}け', d: 'カレーライスに{入|はい}っている{色|いろ}は？ {料理|りょうり}の{色|いろ}をぜんぶあてよう。', stripe: 'linear-gradient(var(--yel),var(--red),var(--grn))' },
+  { key: 'k5', mode: 'k', ta: false, t: 'こんだてをつくろう', d: '{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}・{汁物|しるもの}がそろうように{品|ひん}をえらんで、バランスのよいこんだてにしよう。', stripe: 'linear-gradient(90deg,var(--red),var(--yel),var(--grn))' },
+  { key: 'e10', mode: 'e', ta: false, t: '{行事|ぎょうじ}のたべもの', d: 'お{正月|しょうがつ}・{節分|せつぶん}・{冬至|とうじ}…。{行事|ぎょうじ}の{日|ひ}に{食|た}べるものは？', stripe: 'linear-gradient(#B8432E,#F7B6C2,#F7D046)' },
+  { key: 's10', mode: 's', ta: false, t: 'しゅん（{季節|きせつ}）', d: 'いちばんおいしい{季節|きせつ}は {春|はる}・{夏|なつ}・{秋|あき}・{冬|ふゆ} のどれ？', stripe: 'linear-gradient(var(--haru),var(--natsu),var(--aki),var(--fuyu))' },
+];
+const DIFF_NOTE = {
+  easy: 'よく{見|み}るたべものから{出|で}るよ。まちがえやすいものは{出|で}ないよ。',
+  normal: 'ぜんぶのたべものから{出|で}るよ。',
+  hard: 'まちがえやすいもの（{赤|あか}いけど{緑|みどり}、{地下|ちか}にあるけど{茎|くき}、など）が{多|おお}め。1もん8びょう！',
+};
+function renderCourses() {
+  $$('#seg-diff button').forEach(b => b.setAttribute('aria-pressed', b.dataset.d === store.d.diff));
+  $('#diff-note').innerHTML = R(DIFF_NOTE[store.d.diff]);
+  const ta = store.d.play === 'ta';
+  $$('#seg-play button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === store.d.play));
+  $('#course-grid').innerHTML = COURSES.filter(c => !(ta && c.mode === 'k')).map(c => {
+    const best = store.d.best[c.key + (ta ? '-ta' : '') + '|' + store.d.diff];
+    return `<button class="course" data-k="${c.key}" style="--stripe:${c.stripe}">
+      ${best != null ? `<span class="best">ベスト ${best}${ta ? 'こ' : c.mode === 'k' ? '/5' : '/10'}</span>` : ''}
+      <span class="t">${R(c.t)}</span><span class="d">${R(c.d)}<br><b>${ta ? '60びょう' : c.mode === 'k' ? '5かい' : '10もん'}</b>・${pool(c.mode, store.d.diff).length}${R(c.mode === 'd' || c.mode === 'k' ? 'の{料理|りょうり}から' : c.mode === 'e' ? 'の{行事|ぎょうじ}から' : '{品|ひん}から')}</span></button>`;
+  }).join('');
+  $$('#course-grid .course').forEach(b => b.onclick = () => { beep('tap'); const c = COURSES.find(x => x.key === b.dataset.k); c.mode === 'k' ? startKondate(c) : startQuiz(ta ? { ...c, ta: true, key: c.key + '-ta' } : c); });
+}
+$$('#seg-diff button').forEach(b => b.onclick = () => { beep('tap'); store.d.diff = b.dataset.d; store.save(); renderCourses(); });
+$$('#seg-play button').forEach(b => b.onclick = () => { beep('tap'); store.d.play = b.dataset.p; store.save(); renderCourses(); });
+
+/* ---------- question pool ---------- */
+function pool(mode, D) {
+  if (mode === 'd') return D === 'easy' ? DISHES.filter(d => d.ing.length <= 3) : DISHES;
+  if (mode === 'k') return DISHES;
+  if (mode === 'e') return EVENTS;
+  const all = FOODS.filter(f => f[mode]);
+  if (D !== 'easy') return all;
+  return mode === 's' ? all.filter(f => f.e) : all.filter(f => !f[MODES[mode].tr]);
+}
+function weightOf(f, mode, D) { const t = MODES[mode].tr; return D === 'hard' && t && f[t] ? 3 : 1; }
+// 出た問題を覚えておき（seen）、しばらく出ていないものから先に出す。回をまたいでも同じ問題がすぐには出ない
+function seenKey(x) { return x.m + ':' + (x.key || x.f.id); }
+function wpickFood(list, wfn, avoid, useSeen) {
+  let cands = list.filter(x => !avoid.has(x.key || x.f.id));
+  if (!cands.length) cands = list;
+  if (useSeen && cands.length > 1) {
+    const sn = store.d.seen || {};
+    cands = [...cands].sort((a, b) => (sn[seenKey(a)] || 0) - (sn[seenKey(b)] || 0) || Math.random() - .5);
+    cands = cands.slice(0, Math.max(6, Math.ceil(cands.length * .3)));
+  }
+  const tot = cands.reduce((a, x) => a + wfn(x), 0); let r = Math.random() * tot;
+  for (const x of cands) { r -= wfn(x); if (r <= 0) return x; }
+  return cands[cands.length - 1];
+}
+
+/* ---------- quiz flow ---------- */
+let Q = null, tickId = null, nextId = null;
+function stopTimers() { if (tickId) { clearInterval(tickId); tickId = null; } if (nextId) { clearTimeout(nextId); nextId = null; } }
+function startQuiz(C, items) {
+  stopTimers();
+  const D = store.d.diff;
+  // items: [{m, f, w}]
+  // もと・どこを食べてる？は、答え（大豆・牛乳… / 根・茎…）ごとに出やすさをそろえる（大豆製品が多くても大豆ばかりにならないように）
+  const P = items ? null : pool(C.mode, D), cnt = {};
+  // 答えごとの重みの合計を√にそろえる：品数の多い答え（大豆など）も出すぎず、品数の少ない答え（花・つぼみなど）が同じ品ばかりにもならない
+  if (P && (C.mode === 'm' || C.mode === 'p' || C.mode === 'd')) P.forEach(f => cnt[f[C.mode]] = (cnt[f[C.mode]] || 0) + weightOf(f, C.mode, D));
+  const dirs = D === 'easy' ? ['f'] : ['f', 'r'];
+  const list = items || (C.mode === 'e' ? EVENTS.flatMap(e => dirs.map(dir => ({ m: 'e', f: e, key: e.id + ':' + dir, dir, w: 1 }))) : null) ||
+    (C.mode === 's' ? P.flatMap(f => ['f', 'r'].map(dir => ({ m: 's', f, key: f.id + ':' + dir, dir, w: 1 }))) : null) || P.map(f => ({ m: C.mode, f, key: f.id, w: weightOf(f, C.mode, D) / (cnt[f[C.mode]] ? Math.sqrt(cnt[f[C.mode]]) : 1) }));
+  Q = { C, D, list, i: 0, score: 0, wrong: [], used: new Set(), recent: [], cur: null };
+  const nq = C.key === 'weak' ? Math.min(NQ, list.length) : NQ;
+  Q.nq = () => nq;   // 問題数（にがては最大10）
+  show('quiz');
+  $('#q-pbar').classList.toggle('time', !!C.ta);
+  if (C.ta) {
+    Q.endAt = performance.now() + TA_SEC * 1000;
+    tickId = setInterval(taTick, 100);
+  }
+  nextQuestion();
+}
+function taTick() {
+  const left = Math.max(0, Q.endAt - performance.now());
+  $('#q-bar').style.width = (left / (TA_SEC * 1000) * 100) + '%';
+  $('#q-no').textContent = `のこり ${Math.ceil(left / 1000)}びょう`;
+  if (left <= 0) { stopTimers(); finish(); }
+}
+function nextQuestion() {
+  if (!Q.C.ta && Q.i >= Q.nq()) return finish();
+  const avoid = Q.C.ta ? new Set(Q.recent) : Q.used;
+  const it = wpickFood(Q.list, x => x.w || 1, avoid, Q.C.key !== 'weak');
+  Q.used.add(it.key || it.f.id);
+  store.d.seen = store.d.seen || {}; store.d.seenTick = (store.d.seenTick || 0) + 1; store.d.seen[seenKey(it)] = store.d.seenTick; store.save();
+  Q.recent.push(it.key || it.f.id); if (Q.recent.length > Math.min(8, Q.list.length - 1)) Q.recent.shift();
+  Q.cur = { m: it.m, f: it.f, answered: false, chosen: null, ok: null };
+  if (Q.cur.m === 'e' || Q.cur.m === 's') Q.cur.dir = it.dir || 'f';   // f：行事→たべもの、r：たべもの→行事
+  Q.cur.opts = optsOf(Q.cur);
+  if (!Q.C.ta) { $('#q-no').textContent = `${Q.i + 1} / ${Q.nq()}`; $('#q-bar').style.width = (Q.i / Q.nq() * 100) + '%'; }
+  $('#q-score').textContent = `⭕ ${Q.score}`;
+  $('#q-fb').classList.add('hidden');
+  renderQuestion(true);
+  // むずかしい：1もんごとの時間
+  const timed = !Q.C.ta && Q.D === 'hard' && Q.C.key !== 'weak';   // ふくしゅうには時間制限をつけない
+  $('#q-timer').classList.toggle('hidden', !timed);
+  if (timed) {
+    const qsec = Q.cur.m === 'd' ? 14 : Q_SEC, end = performance.now() + qsec * 1000;
+    if (tickId) clearInterval(tickId);
+    tickId = setInterval(() => {
+      const left = Math.max(0, end - performance.now());
+      $('#q-timer-bar').style.width = (left / (qsec * 1000) * 100) + '%';
+      if (left <= 0) { clearInterval(tickId); tickId = null; answer(Q.cur.m === 'd' ? '-' : null); }
+    }, 80);
+  }
+  window.scrollTo({ top: 0 });
+}
+// 選択肢：もとは正解＋ほかから3つ（紛らわしいもの＝mban は入れない）。ならびは決まった順。
+function optsOf(q) {
+  if (q.m === 'g' || q.m === 'd') return CKEYS;
+  if (q.m === 's' && q.dir === 'r') {
+    // 季節→たべもの：正解1つと、ほかの季節が旬の3つ（同じ季節のものは入れない）
+    const o = shuffle(FOODS.filter(f => f.s && f.s !== q.f.s && f.id !== q.f.id)).slice(0, 3).map(f => f.id);
+    return shuffle([q.f.id, ...o]);
+  }
+  if (q.m === 's') return SKEYS;
+  if (q.m === 'p') return PKEYS;
+  if (q.m === 'e') { const o = shuffle(EVENTS.filter(e => e.id !== q.f.id && e.mo !== q.f.mo)).slice(0, 3).map(e => e.id); return shuffle([q.f.id, ...o]); }
+  const ban = q.f.mban || [], others = shuffle(BKEYS.filter(k => k !== q.f.m && !ban.includes(k))).slice(0, 3);
+  return BKEYS.filter(k => k === q.f.m || others.includes(k));
+}
+function correctOf(q) { return q.m === 'e' || (q.m === 's' && q.dir === 'r') ? q.f.id : q.f[q.m]; }
+// どこを食べてる？ の小さな絵（その部分だけ色をつける）
+function partIcon(k) {
+  const c = (key, col) => k === key ? col : '#D9D2C3';
+  return `<svg viewBox="0 0 40 40"><path d="M4 24.5 H36" stroke="#B89A6A" stroke-width="2" stroke-linecap="round"/><path d="M17 24.5 L23 24.5 L20 38Z" fill="${c('ne', '#F0862E')}"/><rect x="18.8" y="8" width="2.4" height="16.5" rx="1" fill="${c('kuki', '#4C9A3E')}"/><ellipse cx="12.5" cy="13" rx="6.5" ry="3" transform="rotate(-25 12.5 13)" fill="${c('ha', '#3DAA5C')}"/><ellipse cx="27.5" cy="15" rx="6.5" ry="3" transform="rotate(25 27.5 15)" fill="${c('ha', '#3DAA5C')}"/><circle cx="20" cy="6" r="3.2" fill="${c('tsubomi', '#E86A9A')}"/><path d="M21 19 Q24 19 25 20" stroke="#D9D2C3" stroke-width="1"/><circle cx="26.5" cy="21.5" r="3.4" fill="${c('mi', '#E8483F')}"/></svg>`;
+}
+const baseIcon = k => foodSvg(BASES[k].icon, 'a', '');
+function renderQuestion(anim) {
+  const q = Q.cur, f = q.f;
+  $('#q-tag').innerHTML = R(MODES[q.m].tag);
+  $('#q-food').innerHTML = foodSvg(f.id, 'a', 'fi qfood' + (anim ? ' pop' : ''));
+  $('#q-name').innerHTML = R(f.n);
+  $('#q-text').innerHTML = R(MODES[q.m].q);
+  const ans = correctOf(q), box = $('#q-choices');
+  $('#q-ing').classList.toggle('hidden', q.m !== 'd');
+  $('#q-confirm').classList.toggle('hidden', q.m !== 'd' || q.answered);
+  if (q.m === 'd') {
+    $('#q-ing').innerHTML = `<div class="ingh">${R('{入|はい}っているもの')}</div>` + q.f.ing.map(id => `<span class="ingc">${foodSvg(id)}${R(F[id].n)}</span>`).join('');
+    q.sel = q.sel || new Set();
+    box.className = 'plates';
+    box.innerHTML = CKEYS.map(g => `<button class="plate tog${q.sel.has(g) ? ' on' : ''}" data-v="${g}" style="--c:${GROUPS[g].c}"><span class="dish">${R(GROUPS[g].n)}</span><span class="lab">${R(GROUPS[g].sh)}</span></button>`).join('');
+    $$('button', box).forEach(b => {
+      const v = b.dataset.v;
+      if (q.answered) {
+        b.disabled = true; const inA = ans.includes(v), inC = (q.chosen || '').includes(v);
+        b.classList.add(inA && inC ? 'ok' : inA ? 'miss' : inC ? 'ng' : 'dim');
+      } else b.onclick = () => { beep('tap'); q.sel.has(v) ? q.sel.delete(v) : q.sel.add(v); b.classList.toggle('on', q.sel.has(v)); };
+    });
+    $('#q-confirm').onclick = () => answer(CKEYS.filter(c => q.sel.has(c)).join(''));
+    if (q.answered && !Q.C.ta) renderExplain();
+    return;
+  }
+  if (q.m === 's' && q.dir === 'r') {
+    const S = SEASONS[q.f.s];
+    $('#q-food').innerHTML = `<div class="evcard sscard" style="--c:${S.hex};background:${S.light};border-color:${S.hex}">${seasonIcon(q.f.s)}<span class="evd">${S.months.join('・')}{月}</span><span class="evn">${R(S.n)}</span></div>`.replace('{月}', R('{月|がつ}'));
+    $('#q-name').innerHTML = ''; $('#q-text').innerHTML = R(`${S.n}がしゅんのたべものはどれ？`);
+    box.className = 'seasons opts';
+    box.innerHTML = q.opts.map(id => `<button class="sbtn obtn" data-v="${id}" style="--c:${S.hex}">${foodSvg(id, 'a', '')}<span>${R(F[id].n)}</span></button>`).join('');
+    $$('button', box).forEach(b => {
+      const v = b.dataset.v;
+      if (q.answered) { b.disabled = true; b.classList.add(v === ans ? 'ok' : v === q.chosen ? 'ng' : 'dim'); }
+      b.onclick = () => answer(v);
+    });
+    if (q.answered && !Q.C.ta) renderExplain();
+    return;
+  }
+  if (q.m === 'e') {
+    if (q.dir === 'f') {
+      $('#q-food').innerHTML = `<div class="evcard"><span class="evd">${R(q.f.date)}</span><span class="evn">${R(q.f.ev)}</span></div>`;
+      $('#q-name').innerHTML = ''; $('#q-text').innerHTML = R('この{日|ひ}に{食|た}べるのはどれ？');
+      box.className = 'seasons opts';
+      box.innerHTML = q.opts.map(id => `<button class="sbtn obtn" data-v="${id}" style="--c:#B8432E">${foodSvg(id, 'a', '')}<span>${R(F[id].n)}</span></button>`).join('');
+    } else {
+      $('#q-text').innerHTML = R('どの{行事|ぎょうじ}に{食|た}べる？');
+      box.className = 'seasons evopts';
+      box.innerHTML = q.opts.map(id => `<button class="sbtn" data-v="${id}" style="--c:#B8432E"><span class="evb"><small>${R(F[id].date)}</small><span>${R(F[id].ev)}</span></span></button>`).join('');
+    }
+    $$('button', box).forEach(b => {
+      const v = b.dataset.v;
+      if (q.answered) { b.disabled = true; b.classList.add(v === ans ? 'ok' : v === q.chosen ? 'ng' : 'dim'); }
+      b.onclick = () => answer(v);
+    });
+    if (q.answered && !Q.C.ta) renderExplain();
+    return;
+  }
+  if (q.m === 'g') {
+    box.className = 'plates';
+    box.innerHTML = ['r', 'y', 'g'].map(g => `<button class="plate" data-v="${g}" style="--c:${GROUPS[g].c}"><span class="dish">${R(GROUPS[g].n)}</span><span class="lab">${R(GROUPS[g].sh)}</span></button>`).join('');
+  } else if (q.m === 's') {
+    box.className = 'seasons';
+    box.innerHTML = SKEYS.map(s => `<button class="sbtn" data-v="${s}" style="--c:${SEASONS[s].c}">${seasonIcon(s)}<span>${R(SEASONS[s].n)}</span></button>`).join('');
+  } else if (q.m === 'm') {
+    box.className = 'seasons opts';
+    box.innerHTML = q.opts.map(k => `<button class="sbtn obtn" data-v="${k}" style="--c:var(--navy)">${baseIcon(k)}<span>${R(BASES[k].n)}</span></button>`).join('');
+  } else {
+    box.className = 'seasons opts parts';
+    box.innerHTML = q.opts.map(k => `<button class="sbtn obtn" data-v="${k}" style="--c:#3F7A3A">${partIcon(k)}<span>${R(PARTS[k].n)}</span></button>`).join('');
+  }
+  $$('button', box).forEach(b => {
+    const v = b.dataset.v;
+    if (q.answered) {
+      b.disabled = true;
+      if (v === ans) b.classList.add('ok'); else if (v === q.chosen) b.classList.add('ng'); else b.classList.add('dim');
+    }
+    b.onclick = () => answer(v);
+  });
+  if (q.answered && !Q.C.ta) renderExplain();
+}
+function wkey(q) { return q.m + ':' + q.f.id; }
+function answer(v) {
+  const q = Q.cur; if (!q || q.answered) return;
+  if (tickId && !Q.C.ta) { clearInterval(tickId); tickId = null; }
+  q.answered = true; q.chosen = v; q.ok = v === correctOf(q);
+  const k = wkey(q);
+  q.newGot = q.ok && !store.d.got[q.f.id];
+  if (q.ok) { Q.score++; beep('ok'); store.d.got[q.f.id] = 1; if (Q.C.key === 'weak' && store.d.weak[k]) store.d.weak[k]--; }
+  else { beep('ng'); Q.wrong.push({ m: q.m, id: q.f.id }); store.d.weak[k] = (store.d.weak[k] || 0) + 1; }
+  store.save();
+  $('#q-score').textContent = `⭕ ${Q.score}`;
+  renderQuestion(false);
+  if (Q.C.ta) {
+    flash(q.ok ? '⭕' : '❌');
+    nextId = setTimeout(() => { nextId = null; if (curScreen === 'quiz' && Q.endAt > performance.now()) nextQuestion(); }, q.ok ? 380 : 1100);
+    return;
+  }
+  $('#q-bar').style.width = ((Q.i + 1) / Q.nq() * 100) + '%';
+  $('#q-fb').classList.remove('hidden');
+  $('#btn-next').innerHTML = R(Q.i + 1 >= Q.nq() ? 'けっかを{見|み}る ▶' : 'つぎへ ▶');
+  setTimeout(() => $('#q-fb').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+}
+function flash(t) { const d = document.createElement('div'); d.className = 'flash'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 520); }
+function explainHtml(f, m) {
+  if (m === 'g') {
+    const G = GROUPS[f.g];
+    return `<div><b>${R(f.n)}</b> は ${gBadge(f.g)} のなかま。</div><div style="color:var(--sub);font-size:14.5px">${R(G.n)}：${R(G.d)}（${R(G.ex)}）</div>` + (f.gx ? `<div class="note">${R(f.gx)}</div>` : '');
+  }
+  if (m === 'e') return `<div>${R(f.ev)}（${R(f.date)}）には <b>${R(f.n)}</b> を${R('{食|た}べるよ。')}</div>` + (f.x ? `<div class="note">${R(f.x)}</div>` : '');
+  if (m === 'd') {
+    const list = f.ing.map(id => `<span class="ingc sm">${foodSvg(id)}${R(F[id].n)} ${F[id].g ? gBadge(F[id].g) : `<span class="gb out">${R('{色|いろ}に{数|かぞ}えない')}</span>`}</span>`).join('');
+    return `<div><b>${R(f.n)}</b> ${R('に{入|はい}っている{色|いろ}は')} ${f.d.split('').map(gBadge).join(' ')}</div>` + `<div class="inglist">${list}</div><div class="note">${R('{色|いろ}は、{料理|りょうり}に{入|はい}っている{食材|しょくざい}の{色|いろ}で{数|かぞ}えるよ。{油|あぶら}・さとう・{粉|こな}・ちょうみりょうは{数|かぞ}えていないよ。')}</div>`;
+  }
+  if (m === 's') return `<div><b>${R(f.n)}</b> のしゅんは ${sBadge(f.s)}。</div>` + (f.sx ? `<div class="note">${R(f.sx)}</div>` : '');
+  if (m === 'm') {
+    const B = BASES[f.m], link = f.g && f.g === B.g ? `<div style="color:var(--sub);font-size:14.5px">${R(B.n)}からできているので、${R(f.n)}も ${gBadge(f.g)} のなかま。</div>` : '';
+    return `<div><b>${R(f.n)}</b> は ${mBadge(f.m)} からできている。</div>` + link + (f.mx ? `<div class="note">${R(f.mx)}</div>` : '');
+  }
+  return `<div><b>${R(f.n)}</b> は ${pBadge(f.p)} を${R('{食|た}べている')}。</div>` + (f.px ? `<div class="note">${R(f.px)}</div>` : '');
+}
+function renderExplain() {
+  const q = Q.cur, fb = $('#q-fb');
+  fb.classList.toggle('ng', !q.ok);
+  $('#fb-res').textContent = q.ok ? sample(['せいかい！', 'すごい！ せいかい！', 'やったね！ せいかい！']) : q.chosen == null ? 'じかんぎれ…' : 'ざんねん…';
+  const extra = q.m === 's' && q.dir === 'r' && q.chosen && q.chosen !== q.f.id && F[q.chosen] ? `<div style="margin-top:4px">${R('えらんだ')} <b>${R(F[q.chosen].n)}</b> ${R('のしゅんは')} ${sBadge(F[q.chosen].s)}。</div>` : '';
+  $('#fb-exp').innerHTML = explainHtml(q.f, q.m) + extra + (q.newGot ? `<div class="newgot">📖 ${R('ずかんに {新|あたら}しくのったよ！')}</div>` : '');
+}
+$('#btn-next').onclick = () => { beep('tap'); Q.i++; nextQuestion(); };
+function finish() {
+  stopTimers();
+  const sc = Q.score, key = Q.C.key + '|' + Q.D, ta = !!Q.C.ta;
+  let bestTxt = '';
+  if (Q.C.key !== 'weak') {
+    const prev = store.d.best[key];
+    if (prev == null || sc > prev) { store.d.best[key] = sc; if (prev != null) bestTxt = '🎉 ベスト{記録|きろく}こうしん！'; }
+    else bestTxt = `ベスト ${prev}${ta ? 'こ' : ' / ' + NQ}`;
+    store.save();
+  }
+  const nq = ta ? null : Q.nq();
+  const stars = ta ? (sc >= 25 ? 3 : sc >= 15 ? 2 : sc >= 8 ? 1 : 0) : (sc >= nq ? 3 : sc >= nq * .7 ? 2 : sc >= nq * .4 ? 1 : 0);
+  $('#r-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  $('#r-score').innerHTML = ta ? `${sc}<small> こ せいかい！</small>` : `${sc}<small> / ${nq}</small>`;
+  const title = Q.C.mode === 's' ? 'しゅん' : Q.C.mode === 'g' ? 'なかま{分|わ}け' : Q.C.mode === 'm' ? 'もと' : Q.C.mode === 'p' ? 'やさい' : Q.C.mode === 'd' ? 'りょうり' : Q.C.mode === 'e' ? 'ぎょうじ' : 'にがて';
+  $('#r-msg').innerHTML = R(!ta && sc === nq ? (Q.C.key === 'weak' ? 'ぜんもん{正解|せいかい}！ にがてをこくふくしたね！' : `ぜんもん{正解|せいかい}！ ${title}マスターだ！`) : stars >= 2 ? 'よくできました！' : stars === 1 ? 'そのちょうし！' : 'にがてリストでふくしゅうしよう！');
+  $('#r-best').innerHTML = R(bestTxt);
+  renderResultList();
+  show('result'); beep(stars >= 2 ? 'fan' : 'tap');
+}
+function itemLi(m, id, extra = '') {
+  const f = F[id];
+  const bd = m === 'g' ? gBadge(f.g) : m === 's' ? sBadge(f.s) : m === 'm' ? mBadge(f.m) : m === 'p' ? pBadge(f.p) : m === 'e' ? `<span class="gb" style="--c:#B8432E">${R(f.ev)}</span>` : f.d.split('').map(gBadge).join('');
+  return `<li>${foodSvg(id)}<span class="nm">${R(f.n)}</span>${bd}<span style="font-size:12px;color:var(--sub);font-weight:700">${R(MODES[m].tag)}</span>${extra}</li>`;
+}
+function renderResultList() {
+  if (!Q) return;
+  const seen = new Set(), uniq = Q.wrong.filter(w => { const k = w.m + w.id; if (seen.has(k)) return false; seen.add(k); return true; });
+  $('#r-wrong-h').classList.toggle('hidden', !uniq.length);
+  $('#r-wrong').innerHTML = uniq.map(w => itemLi(w.m, w.id)).join('');
+}
+$('#btn-retry').onclick = () => { beep('tap'); if (Q.C.key === 'weak') return startWeak(); if (Q.C.mode === 'k') return startKondate(Q.C); startQuiz(Q.C); };
+$('#btn-course2').onclick = () => { beep('tap'); show('course'); renderCourses(); };
+$('#btn-title2').onclick = () => { beep('tap'); show('title'); };
+
+/* ---------- こんだてをつくろう ---------- */
+// 主食・主菜・副菜・汁物のうち3つ（むずかしいは2つ）が決まっていて、たりない品を候補から選ぶ
+const KN = 5;
+let K = null;
+const kOf = id => F[id].k;
+// こんだて：和・洋・中の「定食」でそろえる。空けるのは主菜と副菜だけ
+const stOf = d => (d.st || '').split(',').filter(Boolean);
+const kIn = (s, c, kx = false) => DISHES.filter(d => d.k === c && stOf(d).includes(s) && (kx || !d.kx)).map(d => d.id);
+function kRedsOk(ids) { const reds = ids.flatMap(id => F[id].ing.filter(i => F[i].g === 'r')); return new Set(reds).size === reds.length; }
+// わなの候補を、種類ごとにかわるがわる取り出す
+function kMix(groups, n) {
+  const gs = groups.map(g => shuffle(g)).filter(g => g.length), out = [];
+  while (out.length < n && gs.some(g => g.length)) for (const g of gs) { if (g.length && out.length < n) { const id = g.shift(); if (!out.includes(id)) out.push(id); } }
+  return out;
+}
+function kMakeRound(D, used, type) {
+  for (let t = 0; t < 600; t++) {
+    const rr = Math.random(), s = rr < .5 ? 'wa' : rr < .8 ? 'yo' : 'chu';
+    const menu = {};
+    for (const c of KKEYS) menu[c] = sample(kIn(s, c));
+    if (Object.values(menu).some(v => !v) || !kRedsOk(Object.values(menu))) continue;
+    const sig = s + '|' + KKEYS.map(c => menu[c]).join('|');
+    if (used.has(sig)) continue;
+    const inMenu = id => Object.values(menu).includes(id);
+    const ones = DISHES.filter(d => d.k === 'one' && stOf(d).includes(s)).map(d => d.id);
+    const shus = kIn(s, 'shu', true).filter(id => !inMenu(id));
+    // コロッケは子どもには「メインのおかず」に見えるので、主菜を考える問題では副菜のわなにしない（d.kmx）
+    const more = (c, noMx) => kIn(s, c).filter(id => !inMenu(id) && !(noMx && F[id].kmx));
+    const order = D === 'easy' ? [...KKEYS] : shuffle([...KKEYS]);
+    if (type === 'swap') {
+      const dup = Math.random() < .6 ? 'sai' : 'fuku', lack = dup === 'sai' ? 'fuku' : 'sai';
+      if (dup === 'fuku' && F[menu.fuku].kmx) continue;
+      const second = more(dup, dup === 'fuku').find(id => kRedsOk([...Object.values(menu), id]));
+      if (!second) continue;
+      // ならべる4品：主食・同じ種類が2つ・汁物（たりない種類は候補の中に1つだけ）
+      const shown = shuffle([menu.shu, menu[dup], second, menu.shiru]);
+      const traps = kMix([more(dup, dup === 'fuku').filter(id => id !== second), ones, lack === 'fuku' ? [] : more('shiru')], 3);
+      if (traps.length < 2) continue;
+      used.add(sig);
+      return { type, s, menu, dup, lack, second, shown, cands: shuffle([menu[lack], ...traps]) };
+    }
+    const miss = D === 'hard' ? ['sai', 'fuku'] : [sample(['sai', 'fuku'])];
+    if (miss.includes('sai') && miss.includes('fuku') && F[menu.fuku].kmx) continue;
+    const nC = D === 'easy' ? 3 : D === 'normal' ? 4 : 6;
+    // 正しい種類は候補に1つだけ。副菜がたりないときは汁物を候補に出さない（食事バランスガイドでは野菜の汁物も副菜に数えるため）
+    const groups = [];
+    if (!miss.includes('sai')) groups.push(more('sai'));
+    if (!miss.includes('fuku')) groups.push(more('fuku', true));
+    groups.push(ones);
+    if (!miss.includes('fuku')) groups.push(more('shiru'));
+    if (D !== 'easy') groups.push(shus);
+    const traps = kMix(groups, nC - miss.length);
+    if (traps.length < Math.min(2, nC - miss.length)) continue;
+    used.add(sig);
+    return { type: 'miss', s, menu, miss, order, cands: shuffle([...miss.map(c => menu[c]), ...traps]) };
+  }
+}
+function startKondate(C) {
+  stopTimers();
+  const D = store.d.diff, used = new Set();
+  const types = D === 'hard' ? shuffle(['miss', 'miss', 'miss', 'swap', 'swap']) : Array(KN).fill('miss');
+  K = { C, D, i: 0, score: 0, rounds: types.map(t => kMakeRound(D, used, t)), sel: new Set(), rm: null, done: false };
+  show('kondate'); kRound();
+}
+function kRound() {
+  K.sel = new Set(); K.rm = null; K.done = false;
+  $('#k-no').textContent = `${K.i + 1} / ${KN}`; $('#k-bar').style.width = (K.i / KN * 100) + '%'; $('#k-score').textContent = `⭕ ${K.score}`;
+  $('#k-fb').classList.add('hidden'); $('#k-done').classList.remove('hidden');
+  kRender(); window.scrollTo({ top: 0 });
+}
+function kMenuIds(r) { return KKEYS.map(c => r.menu[c]); }
+// いまテーブルにある品（3色メーター用）
+function kNowIds(r) {
+  if (K.done) return kMenuIds(r);
+  if (r.type === 'swap') return [...r.shown.filter(id => id !== K.rm), ...K.sel];
+  return [...KKEYS.filter(c => !r.miss.includes(c)).map(c => r.menu[c]), ...K.sel];
+}
+const kLab = id => F[id].k === 'one' ? '{主食|しゅしょく}＋おかず' : KC[F[id].k].n;
+function kSlot(id, lab, cls = '', attr = '') {
+  return `<div class="kslot${id ? ' on' : ''}${cls}" ${attr}>${id ? foodSvg(id) : '<span class="qm">？</span>'}${lab ? `<span class="kc">${R(lab)}</span>` : ''}<span class="kn">${id ? R(F[id].n) : ''}</span></div>`;
+}
+function kRender() {
+  const r = K.rounds[K.i], showLab = K.D === 'easy' || K.done;
+  const sty = `<span class="ksty">${R({ wa: '{和食|わしょく}', yo: '{洋食|ようしょく}', chu: '{中華|ちゅうか}' }[r.s])}のこんだて</span>`;
+  let need;
+  if (r.type === 'swap') {
+    need = 1;
+    $('#k-odai').innerHTML = sty + R('バランスがよくないこんだてだよ。') + '<br>' + R('1{品|ぴん}はずして、かわりの1{品|ぴん}をえらぼう！') +
+      (K.done ? '' : `<div class="kstep">${R(K.rm ? '② かわりに{入|い}れる{品|ひん}を、下からえらぶ' : '① はずす{品|ひん}をタップ')}</div>`);
+    $('#k-slots').innerHTML = K.done
+      ? KKEYS.map(c => kSlot(r.menu[c], KC[c].n, c === r.lack ? ' ans' : '')).join('')
+      : r.shown.map(id => kSlot(id, showLab ? kLab(id) : '', ` tap${K.rm === id ? ' rm' : ''}`, `data-id="${id}" role="button" tabindex="0"`)).join('');
+    $$('#k-slots .kslot.tap').forEach(el => el.onclick = () => { if (K.done) return; beep('tap'); K.rm = K.rm === el.dataset.id ? null : el.dataset.id; kRender(); });
+  } else {
+    need = r.miss.length;
+    $('#k-odai').innerHTML = sty + R('{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}・{汁物|しるもの}がそろった、') + '<br>' + R('バランスのよいこんだてにしよう！') + '<br>' + R(`あと${need}{品|ひん}えらんでね。`);
+    const order = K.done ? KKEYS : r.order;
+    $('#k-slots').innerHTML = order.map(c => {
+      const fixed = !r.miss.includes(c), id = fixed || K.done ? r.menu[c] : null;
+      return kSlot(id, showLab ? KC[c].n : '', !fixed && K.done ? ' ans' : '');
+    }).join('');
+  }
+  // 3色：かんたんは選びながら見える。ふつう・むずかしいは「できた！」のあとで見える
+  const have = colorsOf(kNowIds(r).flatMap(id => F[id].ing)), showMeter = K.D === 'easy' || K.done;
+  $('#k-meter').innerHTML = showMeter ? CKEYS.map(g => `<span class="km${have.includes(g) ? ' on' : ''}" style="--c:${GROUPS[g].c}">${R(GROUPS[g].n)}</span>`).join('') : '';
+  const right = id => r.type === 'swap' ? id === r.menu[r.lack] : r.miss.includes(kOf(id));
+  $('#k-cats').innerHTML = `<div class="klegend">${KKEYS.map(c => `<span><b>${R(KC[c].n)}</b>${R(KC[c].d)}</span>`).join('')}</div>` +
+    `<h3>${R(`こうほ（${need}つえらぶ）`)}</h3><div class="kgrid">${r.cands.map(id => {
+      const ok = K.done && right(id), ng = K.done && K.sel.has(id) && !ok;
+      return `<button class="kcard${K.sel.has(id) ? ' sel' : ''}${ok ? ' ok' : ''}${ng ? ' ng' : ''}" data-id="${id}" ${K.done ? 'disabled' : ''}>${foodSvg(id)}<span>${R(F[id].n)}</span>${K.done ? `<small>${R(kLab(id))}</small>` : ''}</button>`;
+    }).join('')}</div>`;
+  $$('#k-cats .kcard').forEach(b => b.onclick = () => {
+    beep('tap'); const id = b.dataset.id;
+    if (K.sel.has(id)) K.sel.delete(id); else { if (K.sel.size >= need) K.sel.delete([...K.sel][0]); K.sel.add(id); }
+    kRender();
+  });
+  $('#k-done').disabled = K.done || K.sel.size !== need || (r.type === 'swap' && !K.rm);
+}
+// 答えたあと、候補の1つ1つに「なぜ」をつける
+function kWhy(r, id) {
+  const c = kOf(id), d = F[id], nm = R(d.n), note = d.kn ? R(d.kn) : '';
+  const has = cc => r.type === 'swap' && cc === r.dup ? `「${R(F[r.menu[cc]].n)}」と「${R(F[r.second].n)}」` : `「${R(F[r.menu[cc]].n)}」`;
+  if (r.type === 'swap' ? id === r.menu[r.lack] : r.miss.includes(c)) return `<div>⭕ ${nm} は ${R(KC[c].n)}。${note}</div>`;
+  if (c === 'one') return `<div>${nm} は、{主食}とおかずがいっしょになった{料理}。{主食}はもう${has('shu')}があるよ。</div>`.replace(/\{主食\}/g, R('{主食|しゅしょく}')).replace('{料理}', R('{料理|りょうり}'));
+  return `<div>${nm} は ${R(KC[c].n)}。${note}${R(KC[c].n)}はもう${has(c)}があるよ。</div>`;
+}
+$('#k-done').onclick = () => {
+  if (K.done) return;
+  const r = K.rounds[K.i];
+  const ok = r.type === 'swap'
+    ? kOf(K.rm) === r.dup && [...K.sel].every(id => kOf(id) === r.lack)
+    : [...K.sel].map(kOf).sort().join(',') === [...r.miss].sort().join(',');
+  const rm = K.rm;
+  K.done = true;
+  if (ok) { K.score++; beep('ok'); kMenuIds(r).forEach(id => store.d.got[id] = 1); store.save(); } else beep('ng');
+  kRender(); $('#k-done').classList.add('hidden');
+  $('#k-score').textContent = `⭕ ${K.score}`; $('#k-bar').style.width = ((K.i + 1) / KN * 100) + '%';
+  $('#k-fb').classList.toggle('ng', !ok);
+  $('#k-res').textContent = ok ? sample(['こんだて かんせい！', 'バランスばっちり！']) : 'おしい…';
+  let head;
+  if (r.type === 'swap') {
+    const rmTxt = kOf(rm) === r.dup ? '' : `<div>${R(F[rm].n)} は ${R(kLab(rm))}。${R('はずすと、') + R(kOf(rm) === 'shu' ? '{主食|しゅしょく}がなくなってしまうよ。' : '{汁物|しるもの}がなくなってしまうよ。')}</div>`;
+    head = `<div>${R(`${KC[r.dup].n}が2つあって、${KC[r.lack].n}がなかったね。${KC[r.dup].n}を1つはずして、${KC[r.lack].n}を{入|い}れるとそろうよ。`)}</div>` + rmTxt;
+  } else head = ok ? '' : `<div>${R('たりなかったのは')} ${r.miss.map(c => `<b>${R(KC[c].n)}</b>`).join('・')}${R('。')}</div>`;
+  $('#k-exp').innerHTML = head + `<div class="kwhy">${r.cands.map(id => kWhy(r, id)).join('')}</div>` +
+    `<div class="note">${R('{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}・{汁物|しるもの}がそろうと、{赤|あか}・{黄|き}・{緑|みどり}もそろいやすいよ。このゲームでは、{汁物|しるもの}を{副菜|ふくさい}と{分|わ}けて{数|かぞ}えるよ。')}</div>` +
+    KKEYS.map(c => { const d = F[r.menu[c]]; return `<div style="margin-top:6px"><b>${R(KC[c].n)}：${R(d.n)}</b></div><div class="inglist">${d.ing.map(id => `<span class="ingc sm">${foodSvg(id)}${R(F[id].n)} ${F[id].g ? gBadge(F[id].g) : `<span class="gb out">${R('{色|いろ}に{数|かぞ}えない')}</span>`}</span>`).join('')}</div>`; }).join('');
+  $('#k-fb').classList.remove('hidden');
+  $('#k-next').innerHTML = R(K.i + 1 >= KN ? 'けっかを{見|み}る ▶' : 'つぎへ ▶');
+  setTimeout(() => $('#k-fb').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+};
+$('#k-next').onclick = () => { beep('tap'); K.i++; if (K.i < KN) return kRound(); kFinish(); };
+function kFinish() {
+  const sc = K.score, key = K.C.key + '|' + K.D, prev = store.d.best[key];
+  let bestTxt = '';
+  if (prev == null || sc > prev) { store.d.best[key] = sc; if (prev != null) bestTxt = '🎉 ベスト{記録|きろく}こうしん！'; } else bestTxt = `ベスト ${prev} / ${KN}`;
+  store.save();
+  const stars = sc >= 5 ? 3 : sc >= 4 ? 2 : sc >= 2 ? 1 : 0;
+  $('#r-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  $('#r-score').innerHTML = `${sc}<small> / ${KN}</small>`;
+  $('#r-msg').innerHTML = R(sc === KN ? 'ぜんぶかんせい！ こんだてマスターだ！' : stars >= 2 ? 'よくできました！' : 'ずかんの「りょうり」で{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}を{見|み}てみよう！');
+  $('#r-best').innerHTML = R(bestTxt);
+  $('#r-wrong-h').classList.add('hidden'); $('#r-wrong').innerHTML = '';
+  Q = { C: K.C, D: K.D, wrong: [] };
+  show('result'); beep(stars >= 2 ? 'fan' : 'tap');
+}
+
+/* ---------- weak ---------- */
+function renderWeak() {
+  const w = weakItems();
+  $('#weak-list').innerHTML = w.length ? w.map(o => itemLi(o.m, o.id, `<span class="times">×${o.n}</span>`)).join('') : '<li class="empty" style="display:block">まだありません。クイズであそんでみよう！</li>';
+  $('#btn-weak-play').disabled = !w.length; $('#btn-weak-clear').disabled = !w.length;
+}
+function startWeak() {
+  const w = weakItems(); if (!w.length) return show('weak');
+  const C = { key: 'weak', mode: 'mix', ta: false, t: 'にがて' };
+  startQuiz(C, w.map(o => ({ m: o.m, f: F[o.id], key: o.k, w: o.n + 1 })));
+}
+$('#btn-weak-play').onclick = () => { beep('tap'); startWeak(); };
+$('#btn-weak-clear').onclick = () => {
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box">にがてリストをぜんぶけしますか？<div class="row"><button class="btn ghost" data-a="n">やめる</button><button class="btn orange" data-a="y">けす</button></div></div>`;
+  m.onclick = e => { const a = e.target.dataset.a; if (a === 'y') { store.d.weak = {}; store.save(); renderWeak(); } if (a || e.target === m) m.remove(); };
+  document.body.appendChild(m);
+};
+
+/* ---------- zukan ---------- */
+let zTab = 'g', zSel = null;
+$$('#z-tabs button').forEach(b => b.onclick = () => { beep('tap'); zTab = b.dataset.t; zSel = null; renderZukan(); });
+function renderZukan() {
+  $$('#z-tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === zTab));
+  const all = [...FOODS, ...DISHES, ...EVENTS], gotN = all.filter(f => store.d.got[f.id]).length;
+  $('#z-prog').innerHTML = `<div class="zp-t">${R('あつめた')} <b>${gotN}</b> / ${all.length}${gotN === all.length ? ` 🏅 ${R('ずかんマスター！')}` : ''}</div><div class="pbar"><i style="width:${gotN / all.length * 100}%"></i></div><div class="zp-n">${R('クイズで{正解|せいかい}すると、{色|いろ}がついてずかんにのるよ。')}</div>`;
+  $('#z-g').classList.toggle('hidden', zTab !== 'g'); $('#z-s').classList.toggle('hidden', zTab !== 's'); $('#z-mp').classList.toggle('hidden', !['m', 'p', 'r', 'e'].includes(zTab));
+  if (zTab === 'g') renderZG(); else if (zTab === 's') renderCal(); else if (zTab === 'r') renderZR(); else if (zTab === 'e') renderZE(); else renderZMP(zTab);
+  renderZInfo();
+  $('#credit').innerHTML = R('3{色|しょく}の{分|わ}け{方|かた}は、{農林水産省|のうりんすいさんしょう}「{実践|じっせん}{食育|しょくいく}ナビ」の「{三色|さんしょく}{食品群|しょくひんぐん}」の{説明|せつめい}に{合|あ}わせています。{旬|しゅん}は、{農林水産省|のうりんすいさんしょう}「{子|こ}どもの{食育|しょくいく}」の「{食|た}べ{物|もの}と{日本|にほん}の{四季|しき}」「{食|た}べ{物|もの}の{旬|しゅん}や{季節|きせつ}がわかるかな」に（ふやした{分|ぶん}は、{農林水産省|のうりんすいさんしょう}の{補助|ほじょ}{事業|じぎょう}でつくられた「{飲食|いんしょく}{事業者|じぎょうしゃ}のためのインバウンド{対応|たいおう}ガイドブック」の「{食材|しょくざい}{歳時記|さいじき}」に。{月|つき}は{品目|ひんもく}ごとに、{農畜産業振興機構|のうちくさんぎょうしんこうきこう}や{県|けん}・{市|し}、{水産庁|すいさんちょう}などの{資料|しりょう}でたしかめています）、もとは{同|おな}じく「{大豆|だいず}{編|へん}」「{乳製品|にゅうせいひん}」「お{米|こめ}{編|へん}」と{農林水産省|のうりんすいさんしょう}の{麦|むぎ}・{練|ね}り{物|もの}の{資料|しりょう}に、どこを{食|た}べてるは「{野菜|やさい}は{土|つち}からやってくる」と{文部科学省|もんぶかがくしょう}「{食生活|しょくせいかつ}{学習|がくしゅう}{教材|きょうざい}」、{農林水産省|のうりんすいさんしょう}の{野菜|やさい}の{区分|くぶん}（しょくようぎくは{山形県|やまがたけん}の{資料|しりょう}）に、{行事|ぎょうじ}は「{行事食|ぎょうじしょく}について」、{北陸|ほくりく}{農政局|のうせいきょく}の{資料|しりょう}（{農林水産省|のうりんすいさんしょう}「{和食|わしょく}」より）、{農林水産省|のうりんすいさんしょう}「aff」の「{節分|せつぶん}といわし{料理|りょうり}」、{世田谷区|せたがやく}・{川口市|かわぐちし}の{資料|しりょう}に、こんだての{主食|しゅしょく}・{主菜|しゅさい}・{副菜|ふくさい}は「{食事|しょくじ}バランスガイド」と{農林水産省|のうりんすいさんしょう}の{料理|りょうり}イラスト{集|しゅう}に{合|あ}わせています（{試作|しさく}）。');
+}
+const cell = id => `<button class="fcell${zSel === id ? ' sel' : ''}${store.d.got[id] ? '' : ' nogot'}" data-id="${id}">${foodSvg(id)}<span>${R(F[id].n)}</span></button>`;
+function bindCells(root) { $$('.fcell', root).forEach(b => b.onclick = () => { beep('tap'); zSel = zSel === b.dataset.id ? null : b.dataset.id; renderZukan(); if (zSel) $('#z-info').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }); }
+function renderZE() {
+  $('#z-mp').innerHTML = `<p class="seg-note">${R('{行事|ぎょうじ}の{日|ひ}は、しゅんカレンダーのまわりにものっているよ。')}</p><div class="evline">` +
+    EVENTS.map(e => `<button class="evrow${zSel === e.id ? ' sel' : ''}${store.d.got[e.id] ? '' : ' nogot'}" data-id="${e.id}"><span class="evm">${e.mo}<small>がつ</small></span>${foodSvg(e.id)}<span class="evt"><b>${R(e.ev)}</b><span>${R(e.n)}</span></span></button>`).join('') + '</div>';
+  $$('#z-mp .evrow').forEach(b => b.onclick = () => { beep('tap'); zSel = zSel === b.dataset.id ? null : b.dataset.id; renderZukan(); if (zSel) $('#z-info').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
+}
+function renderZR() {
+  $('#z-mp').innerHTML = `<p class="seg-note">${R('このゲームでは、{料理|りょうり}をこの{材料|ざいりょう}で{作|つく}ったことにしています。{色|いろ}は{入|はい}っている{食材|しょくざい}で{数|かぞ}えます。{油|あぶら}・さとう・{粉|こな}・ちょうみりょうは{材料|ざいりょう}に{入|い}れていません。')}</p>` +
+    Object.keys(KZ).map(c => `<div class="outbox zgrp"><h4>${R(KZ[c].n)}</h4><div class="fgrid">${DISHES.filter(d => d.k === c).map(d => cell(d.id)).join('')}</div></div>`).join('');
+  bindCells($('#z-mp'));
+}
+function renderZMP(t) {
+  const keys = t === 'm' ? BKEYS : PKEYS;
+  const head = k => t === 'm'
+    ? `<span class="zh-ic">${baseIcon(k)}</span>${R(BASES[k].n)}からできている`
+    : `<span class="zh-ic">${partIcon(k)}</span>${R(PARTS[k].n)}を${R('{食|た}べる')}`;
+  const note = t === 'p' ? `<p class="seg-note">${R('{分|わ}け{方|かた}は{農林水産省|のうりんすいさんしょう}と{文部科学省|もんぶかがくしょう}の{資料|しりょう}に{合|あ}わせています。じゃがいも・さといも・れんこん・しょうがは「{地下|ちか}の{茎|くき}」です。たまねぎは{資料|しりょう}によって「{茎|くき}」と「{葉|は}」に{分|わ}かれるので、{出|だ}していません。')}</p>` : '';
+  $('#z-mp').innerHTML = note + keys.map(k => `<div class="outbox zgrp"><h4>${head(k)}</h4><div class="fgrid">${FOODS.filter(f => f[t] === k).map(f => cell(f.id)).join('')}</div></div>`).join('');
+  bindCells($('#z-mp'));
+}
+function renderZG() {
+  const out = FOODS.filter(f => !f.g);
+  $('#z-g').innerHTML = `<div class="gcols">${['r', 'y', 'g'].map(g => `<div class="gcol" style="--c:${GROUPS[g].c}"><h4>${R(GROUPS[g].n)}</h4><div class="gd">${R(GROUPS[g].d)}</div><div class="fgrid">${FOODS.filter(f => f.g === g).map(f => cell(f.id)).join('')}</div></div>`).join('')}</div>` +
+    (out.length ? `<div class="outbox"><h4>${R('なかま{分|わ}けには{出|で}ないもの')}</h4><div class="fgrid">${out.map(f => cell(f.id)).join('')}</div></div>` : '');
+  bindCells($('#z-g'));
+}
+let zSeason = null;
+function renderCal() {
+  const svg = $('#z-cal'), C = 180;
+  if (!zSeason) { const m = new Date().getMonth() + 1; zSeason = SKEYS.find(k => SEASONS[k].months.includes(m)); }
+  const P = (r, deg) => [C + r * Math.cos(deg * Math.PI / 180), C + r * Math.sin(deg * Math.PI / 180)];
+  const ang = m => m * 30 - 90;   // とけいと同じ向き（12月が上）
+  const arc = (r0, r1, a0, a1) => { const [x0, y0] = P(r1, a0), [x1, y1] = P(r1, a1), [x2, y2] = P(r0, a1), [x3, y3] = P(r0, a0); return `M${x0} ${y0} A${r1} ${r1} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r0} ${r0} 0 0 0 ${x3} ${y3}Z`; };
+  let h = '';
+  SKEYS.forEach(s => {
+    const S = SEASONS[s], mid = ang(S.months[1]), a0 = mid - 45, a1 = mid + 45, on = s === zSeason;
+    h += `<g class="sw" data-s="${s}"><path d="${arc(30, 172, a0, a1)}" fill="${on ? S.hex : S.light}" fill-opacity="${on ? .28 : 1}"/><path d="${arc(140, 172, a0, a1)}" fill="${S.hex}"/>`;
+    const [lx, ly] = P(129, mid);
+    h += `<text x="${lx}" y="${ly + 5}" text-anchor="middle" font-size="15" font-weight="800" fill="${S.hex}">${S.kn}</text></g>`;
+  });
+  // 月の区切りは外側の輪だけ（中の絵の位置は月とは関係ない）
+  for (let m = 1; m <= 12; m++) { const a = ang(m) - 15, [x0, y0] = P((m - 1) % 3 === 2 ? 30 : 140, a), [x1, y1] = P(172, a); h += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#fff" stroke-width="${(m - 1) % 3 === 2 ? 3 : 1}" pointer-events="none"/>`; }
+  for (let m = 1; m <= 12; m++) { const [x, y] = P(156, ang(m)); h += `<text x="${x}" y="${y + 5}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#fff" pointer-events="none">${m}がつ</text>`; }
+  SKEYS.forEach(s => {
+    const mid = ang(SEASONS[s].months[1]), list = FOODS.filter(f => f.s === s);
+    // いちばん外の輪は、まん中（季節の名前）をあけて左右にならべる
+    const r1 = list.slice(0, 4), r2 = list.slice(4, 8), r3 = list.slice(8, 11), r4 = list.slice(11, 13);
+    const put = (f, r, a, sz) => { const [x, y] = P(r, a); h += `<g class="fd"><circle class="bg" cx="${x}" cy="${y}" r="${sz / 2 + 2}"/><g transform="translate(${x - sz / 2} ${y - sz / 2}) scale(${sz / 100})">${foodSvg(f.id).replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g></g>`; };
+    const spread = (n, lo, hi) => n === 1 ? [(lo + hi) / 2] : Array.from({ length: n }, (_, i) => lo + (hi - lo) * i / (n - 1));
+    const nl = Math.ceil(r1.length / 2);
+    [...spread(nl, mid - 36, mid - 14), ...spread(r1.length - nl, mid + 14, mid + 36)].forEach((a, i) => put(r1[i], 116, a, 25));
+    spread(r2.length, mid - 32, mid + 32).forEach((a, i) => put(r2[i], 90, a, 24));
+    spread(r3.length, mid - 26, mid + 26).forEach((a, i) => put(r3[i], 64, a, 22));
+    spread(r4.length, mid - 22, mid + 22).forEach((a, i) => put(r4[i], 41, a, 19));
+  });
+  h += `<circle cx="${C}" cy="${C}" r="28" fill="#fff" pointer-events="none"/><text x="${C}" y="${C - 2}" text-anchor="middle" font-size="12" font-weight="800" fill="#24324A" pointer-events="none">しゅん</text><text x="${C}" y="${C + 13}" text-anchor="middle" font-size="10" font-weight="700" fill="#647089" pointer-events="none">カレンダー</text>`;
+  // 行事は日がはっきりしているので、月の位置に置く（同じ月に2つあるときは少しずらす）
+  const byMo = {};
+  EVENTS.forEach(e => (byMo[e.mo] = byMo[e.mo] || []).push(e));
+  Object.entries(byMo).forEach(([mo, list]) => list.forEach((e, i) => {
+    const a = ang(+mo) + (list.length > 1 ? (i - (list.length - 1) / 2) * 13 : 0), [x, y] = P(193, a), sz = 30;
+    h += `<g class="evk" data-id="${e.id}"><circle cx="${x}" cy="${y}" r="${sz / 2 + 2}" fill="#FFF7E8" stroke="#B8432E" stroke-width="2"/><g transform="translate(${x - sz / 2} ${y - sz / 2}) scale(${sz / 100})">${foodSvg(e.id).replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g></g>`;
+  }));
+  svg.innerHTML = h;
+  $$('.evk', svg).forEach(g => g.addEventListener('click', ev => { ev.stopPropagation(); beep('tap'); zSel = g.dataset.id; renderZukan(); $('#z-info').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }));
+  $$('.sw', svg).forEach(g => g.addEventListener('click', () => { beep('tap'); zSeason = g.dataset.s; zSel = null; renderZukan(); $('#z-spanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }));
+  const out = FOODS.filter(f => !f.s).length;
+  $('#z-cal-note').innerHTML = R(`{季節|きせつ}をタップすると、その{季節|きせつ}のたべものが{下|した}にならぶよ。{季節|きせつ}の{中|なか}の{絵|え}の{場所|ばしょ}は、{月|つき}とは{関係|かんけい}ありません。まだ{旬|しゅん}をしらべていないたべもの（${out}{品|ひん}）は、のせていません。`);
+  const S = SEASONS[zSeason];
+  $('#z-spanel').innerHTML = `<div class="spanel" style="--c:${S.c}"><h4>${R(S.n)}（${S.months.join('・')}{月}）のしゅん</h4><div class="fgrid">${FOODS.filter(f => f.s === zSeason).map(f => cell(f.id)).join('')}</div></div>`.replace('{月}', R('{月|がつ}'));
+  bindCells($('#z-spanel'));
+}
+function renderZInfo() {
+  const box = $('#z-info');
+  if (!zSel) { box.classList.add('hidden'); return; }
+  const f = F[zSel];
+  if (f.kind === 'event') {
+    box.innerHTML = `<button class="x" aria-label="とじる">×</button>${foodSvg(f.id)}<div><div class="nm">${R(f.n)}</div><div class="tg"><span class="gb" style="--c:#B8432E">${R(f.ev)}</span> ${R(f.date)}</div><div class="ex"><div>${R(f.x)}</div></div></div>`;
+    box.classList.remove('hidden'); box.querySelector('.x').onclick = () => { zSel = null; renderZukan(); }; return;
+  }
+  if (f.kind === 'dish') {
+    box.innerHTML = `<button class="x" aria-label="とじる">×</button>${foodSvg(f.id)}<div><div class="nm">${R(f.n)}</div><div class="tg">${R(KZ[f.k].n)}　${f.d.split('').map(gBadge).join(' ')}</div><div class="inglist">${f.ing.map(id => `<span class="ingc sm">${foodSvg(id)}${R(F[id].n)} ${F[id].g ? gBadge(F[id].g) : `<span class="gb out">${R('{色|いろ}に{数|かぞ}えない')}</span>`}</span>`).join('')}</div></div>`;
+    box.classList.remove('hidden'); box.querySelector('.x').onclick = () => { zSel = null; renderZukan(); }; return;
+  }
+  const tg = (f.g ? gBadge(f.g) + ' のなかま' : `<span class="gb out">${R('なかま{分|わ}けには{出|で}ない')}</span>`) + ' ' + (f.s ? 'しゅん ' + sBadge(f.s) : `<span class="gb out">${R('しゅんの{問題|もんだい}には{出|で}ない')}</span>`)
+    + (f.m ? ' もと ' + mBadge(f.m) : '') + (f.p ? ` ${pBadge(f.p)} を${R('{食|た}べる')}` : '');
+  const ex = [f.g ? `${GROUPS[f.g].n}：${GROUPS[f.g].d}` : '', f.gx, f.gn, f.sx, f.mx, f.px].filter(Boolean).map(t => `<div>${R(t)}</div>`).join('');
+  box.innerHTML = `<button class="x" aria-label="とじる">×</button>${foodSvg(f.id)}<div><div class="nm">${R(f.n)}</div><div class="tg">${tg}</div><div class="ex">${ex}</div></div>`;
+  box.classList.remove('hidden');
+  box.querySelector('.x').onclick = () => { zSel = null; renderZukan(); };
+}
+
+/* ---------- sample (絵のみほん) ---------- */
+function renderSample() {
+  const ids = ['tomato', 'gohan', 'tamago', 'shimeji', 'ebi', 'kaki'];
+  const S = [
+    ['a', 'A　{線|せん}あり', 'ふちに{茶色|ちゃいろ}の{線|せん}。ぬりえのような、くっきりした{絵|え}。'],
+    ['b', 'B　{線|せん}なし', '{線|せん}を{使|つか}わない、{色|いろ}の{形|かたち}だけのやわらかい{絵|え}。'],
+    ['c', 'C　{顔|かお}つき', 'A に{目|め}と{口|くち}をつけた、キャラクターふうの{絵|え}。'],
+  ];
+  $('#smp').innerHTML = S.map(([k, t, d]) => `<div class="smpcol"><h4>${R(t)}</h4><p>${R(d)}</p><div class="gr">${ids.map(id => foodSvg(id, k, '')).join('')}</div></div>`).join('');
+}
+
+applyStatic();
+renderTitle();
+</script>
+</body>
+</html>
